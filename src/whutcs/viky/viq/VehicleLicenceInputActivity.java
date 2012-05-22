@@ -393,12 +393,6 @@ public class VehicleLicenceInputActivity extends Activity {
 	public static Bitmap getLoacalBitmap(String path) {
 		try {
 			FileInputStream fis = new FileInputStream(path);
-			// BitmapFactory.Options options = new BitmapFactory.Options();
-			// options.inJustDecodeBounds = true;
-			// BitmapFactory.decodeStream(fis, null, options);
-			// int width = options.outWidth;
-			// int height = options.outHeight;
-			// Log.v(TAG, "Width and height: " + width + " " + height);
 			return BitmapFactory.decodeStream(fis);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -489,13 +483,18 @@ public class VehicleLicenceInputActivity extends Activity {
 		}
 		plateNumber = recognizePlate(mPlateBitmap);
 
-		if (plateNumber.length() >= 7) {
-			plateNumber = plateNumber.substring(plateNumber.length() - 7);
-			for (int row = 0; row < CANDIDATES; row++) {
-				for (int col = 0; col < PLATECHARS; col++) {
-					mCandidateChars[row][col] = (char) ('0' + row + col);
+		int index = plateNumber.length() - 1;
+		for (int col = PLATECHARS - 1; col >= 0; col--) {
+			char c = SPACE;
+			// try to get the right most none space char at plateNumber
+			while (index >= 0) {
+				c = plateNumber.charAt(index--);
+				if (c != SPACE) {
+					break;
 				}
 			}
+			mCandidateChars[0][col] = c;
+			// TODO:
 		}
 	}
 
@@ -622,17 +621,12 @@ public class VehicleLicenceInputActivity extends Activity {
 			// image
 			// TODO:
 			while (plateLikeContour != null && !plateLikeContour.isNull()) {
-				Log.v(TAG,
-						"plateLikeContour.elem_size: "
-								+ plateLikeContour.elem_size());
 				if (plateLikeContour.elem_size() > 0) {
 					// build a polygon surrounding the plate-like contour
 					CvSeq polyPlateLikeContour = cvApproxPoly(plateLikeContour,
 							Loader.sizeof(CvContour.class),
 							cvCreateMemStorage(0), CV_POLY_APPROX_DP,
 							cvContourPerimeter(plateLikeContour) * 0.05, 0);
-					Log.v(TAG, "polyPlateLikeContour.elem_size"
-							+ polyPlateLikeContour.elem_size());
 
 					// if the length of the polygon is 4 then check its
 					// width and height ratio
@@ -726,10 +720,6 @@ public class VehicleLicenceInputActivity extends Activity {
 											Loader.sizeof(CvContour.class),
 											cvCreateMemStorage(0),
 											CV_POLY_APPROX_DP, 1, 0);
-									Log.v(TAG,
-											"polyCharLikeContour.elem_size: "
-													+ polyCharLikeContour
-															.elem_size());
 
 									CvRect charRect = cvBoundingRect(
 											polyCharLikeContour, 0);
@@ -777,8 +767,7 @@ public class VehicleLicenceInputActivity extends Activity {
 			}// while (plateLikeContour != null && !plateLikeContour.isNull())
 
 			if (plateImage != null) {
-				// cvThreshold(plateImage, plateImage, 128, 255,
-				// CV_THRESH_BINARY_INV);
+				cvThreshold(plateImage, plateImage, 100, 255, CV_THRESH_BINARY);
 				if (SAVE_IMG) {
 					cvSaveImage(SAVE_IMAGE_PATH + (poi++)
 							+ ".cvThreshold().jpg", plateImage);

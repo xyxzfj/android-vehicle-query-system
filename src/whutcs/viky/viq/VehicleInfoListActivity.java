@@ -467,6 +467,7 @@ public class VehicleInfoListActivity extends ListActivity {
 			adapter.setViewBinder(new ViewBinder() {
 				public boolean setViewValue(View view, Cursor cursor,
 						int columnIndex) {
+					boolean result = false;
 					if (columnIndex == ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_PHOTO) {
 						ImageView imageView = (ImageView) view;
 						String imagePath = cursor.getString(columnIndex);
@@ -474,11 +475,10 @@ public class VehicleInfoListActivity extends ListActivity {
 							BitmapDrawable drawable = new BitmapDrawable(
 									imagePath);
 							imageView.setImageDrawable(drawable);
-						} else {
-
+							result = true;
 						}
 					}
-					return false;
+					return result;
 				}
 			});
 

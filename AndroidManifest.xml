@@ -29,11 +29,6 @@
             android:icon="@drawable/camera"
             android:label="@string/licence_input"
             android:screenOrientation="portrait" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".VehicleItemViewActivity"
