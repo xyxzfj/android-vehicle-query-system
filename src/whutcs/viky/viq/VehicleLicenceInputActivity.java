@@ -109,9 +109,8 @@ public class VehicleLicenceInputActivity extends Activity {
 	// TODO: set false when publishing
 	private static final boolean SAVE_IMG = true;
 
-	public static final String SAVE_IMAGE_PATH = getDcimDirectory(
-			"AndroidVIQ/SAVE/").getPath()
-			+ File.separator;
+	public static final String SAVE_IMAGE_PATH = getDcimDirectory("viq_save")
+			.getPath() + File.separator;
 
 	private static final int CODE_TAKE_PHOTO = 0;
 	private static final int CODE_SELECT_PHOTO = 1;
@@ -251,7 +250,8 @@ public class VehicleLicenceInputActivity extends Activity {
 			Intent itemShowIntent = new Intent(
 					VehicleLicenceInputActivity.this,
 					VehicleItemViewActivity.class);
-			itemShowIntent.putExtra("licence", licence);
+			itemShowIntent.putExtra("licence", licence).putExtra("vehicle",
+					mVehicleImageFile.getName());
 			startActivity(itemShowIntent);
 		}
 	}

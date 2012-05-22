@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -50,6 +51,7 @@ public class VehicleInfoEditActivity extends Activity {
 	private String birth;
 	private String drivingLicence;
 	private String note;
+	private String vehicle;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -101,8 +103,10 @@ public class VehicleInfoEditActivity extends Activity {
 						.getString(ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_DRIVING_LICENCE);
 				note = cursor
 						.getString(ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_NOTE);
-
+				vehicle = cursor
+						.getString(ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_PHOTO);
 				setTexts();
+				setImage();
 			}
 			cursor.close();
 			database.close();
@@ -116,7 +120,6 @@ public class VehicleInfoEditActivity extends Activity {
 	class OnImageViewClickListener implements OnClickListener {
 
 		public void onClick(View v) {
-			// TODO Auto-generated method stub
 
 		}
 
@@ -137,6 +140,11 @@ public class VehicleInfoEditActivity extends Activity {
 		mBirthText.setText(birth);
 		mDrivingLicenceText.setText(drivingLicence);
 		mNoteText.setText(note);
+	}
+
+	private void setImage() {
+		Bitmap bitmap = ViqImageFetchCacher.getBitmap16(vehicle);
+		mImageView.setImageBitmap(bitmap);
 	}
 
 	@Override

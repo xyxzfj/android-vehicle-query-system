@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.ClipboardManager;
@@ -468,12 +467,13 @@ public class VehicleInfoListActivity extends VehicleBaseListActivity {
 						int columnIndex) {
 					boolean result = false;
 					if (columnIndex == ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_PHOTO) {
-						ImageView imageView = (ImageView) view;
-						String imagePath = cursor.getString(columnIndex);
-						if (imagePath != null) {
-							BitmapDrawable drawable = new BitmapDrawable(
-									imagePath);
-							imageView.setImageDrawable(drawable);
+						final ImageView imageView = (ImageView) view;
+						final String imageName = cursor.getString(columnIndex);
+						if (imageName != null) {
+							// set image in new thread
+							ViqImageFetchCacher fetchCacher = new ViqImageFetchCacher(
+									imageName, imageView);
+							fetchCacher.run();
 							result = true;
 						}
 					}

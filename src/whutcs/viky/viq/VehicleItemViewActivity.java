@@ -62,7 +62,7 @@ public class VehicleItemViewActivity extends ListActivity {
 				ViqSQLiteOpenHelper.TABLE_INFO_COLUMNS_CONCERNED, "licence=?",
 				new String[] { mLicence }, null, null, null);
 		if (infoCursor.getCount() > 0) {
-			basicInfoLayout.setVisibility(View.VISIBLE);
+			// basicInfoLayout.setVisibility(View.VISIBLE);
 			infoCursor.moveToFirst();
 			mPhone = infoCursor
 					.getString(ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_PHONE);
@@ -85,7 +85,11 @@ public class VehicleItemViewActivity extends ListActivity {
 			((TextView) findViewById(R.id.note)).setText(infoCursor
 					.getString(ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_NOTE));
 		} else {
-			basicInfoLayout.setVisibility(View.GONE);
+			// basicInfoLayout.setVisibility(View.GONE);
+			String vehicleImageName = getIntent().getStringExtra("vehicle");
+			startActivity(new Intent(this, VehicleInfoEditActivity.class)
+					.putExtra("licence", mLicence).putExtra("vehicle",
+							vehicleImageName));
 		}
 
 		Cursor queryCursor = database

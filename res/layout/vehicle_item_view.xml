@@ -14,8 +14,7 @@
             android:id="@+id/vehicle_image"
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:contentDescription="@string/vehicle"
-            android:src="@drawable/vehicle" />
+            android:contentDescription="@string/vehicle"/>
 
         <LinearLayout
             android:layout_width="match_parent"
