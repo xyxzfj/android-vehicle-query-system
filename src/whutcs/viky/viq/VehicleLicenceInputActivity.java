@@ -41,12 +41,12 @@ import static com.googlecode.javacv.cpp.opencv_imgproc.cvWarpAffine;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 import android.app.Activity;
@@ -107,7 +107,7 @@ public class VehicleLicenceInputActivity extends Activity {
 	public static final File DIRECTORY_VIQ = getDcimDirectory("AndroidVIQ");
 
 	// TODO: set false when publishing
-	private static final boolean SAVE_IMG = false;
+	private static final boolean SAVE_IMG = true;
 
 	public static final String SAVE_IMAGE_PATH = getDcimDirectory(
 			"AndroidVIQ/SAVE/").getPath()
@@ -390,14 +390,13 @@ public class VehicleLicenceInputActivity extends Activity {
 	 *            the path of the local image file.
 	 * @return the bitmap object.
 	 */
-	public static Bitmap getLoacalBitmap(String path) {
-		try {
-			FileInputStream fis = new FileInputStream(path);
-			return BitmapFactory.decodeStream(fis);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-			return null;
-		}
+	public static final Bitmap getLoacalBitmap(String path) {
+		final BitmapFactory.Options opts = new BitmapFactory.Options();
+		opts.inPreferredConfig = Bitmap.Config.ARGB_8888;
+
+		final Bitmap bmp = BitmapFactory.decodeFile(path, opts);
+
+		return bmp;
 	}
 
 	public static Bitmap iplImageToBitmap(IplImage src) {
@@ -494,8 +493,45 @@ public class VehicleLicenceInputActivity extends Activity {
 				}
 			}
 			mCandidateChars[0][col] = c;
-			// TODO:
+
+			ArrayList<Character> alikeChars = getAlikeChars(c);
+			for (int row = 1; row < CANDIDATES && row - 1 < alikeChars.size(); row++) {
+				mCandidateChars[row][col] = alikeChars.get(row - 1);
+			}
 		}
+	}
+
+	private static ArrayList<Character> getAlikeChars(char c) {
+		ArrayList<Character> alikeChars = new ArrayList<Character>();
+
+		final int CHARS = 3;
+		final char likeChars[][] = new char[CHARS][];
+
+		likeChars[0] = new char[] { 'F', 'P' };
+		likeChars[1] = new char[] { '1', 'I' };
+		likeChars[2] = new char[] { '0', 'O' };
+
+		int row = 0;
+		int col = 0;
+		boolean found = false;
+		for (; row < CHARS && !found; row++) {
+			for (; col < likeChars[row].length && !found; col++) {
+				if (likeChars[row][col] == c) {
+					found = true;
+				}
+			}
+		}
+		if (found) {
+			row--;
+			col--;
+			for (int j = 0; j < likeChars[row].length; j++) {
+				if (j != col) {
+					alikeChars.add(likeChars[row][j]);
+				}
+			}
+		}
+
+		return alikeChars;
 	}
 
 	private String recognizePlate(Bitmap plateBitmap) {
@@ -692,11 +728,12 @@ public class VehicleLicenceInputActivity extends Activity {
 							}
 
 							// create a all white clone of plate image
-							plateImage = plateLikeImage.clone();
-							cvSet(plateImage, CV_RGB(255.0, 255, 255));
+							IplImage plateLikeImageClone = plateLikeImage
+									.clone();
+							cvSet(plateLikeImageClone, CV_RGB(255.0, 255, 255));
 							if (SAVE_IMG) {
 								cvSaveImage(SAVE_IMAGE_PATH + (poi++)
-										+ ".cvSet().jpg", plateImage);
+										+ ".cvSet().jpg", plateLikeImageClone);
 							}
 
 							CvSeq charLikeContour = new CvSeq(null);
@@ -741,10 +778,12 @@ public class VehicleLicenceInputActivity extends Activity {
 													+ ".cvSetImageROI().jpg",
 													plateImageClone);
 										}
-										cvSetImageROI(plateImage, charRect);
-										cvCopy(plateImageClone, plateImage);
+										cvSetImageROI(plateLikeImageClone,
+												charRect);
+										cvCopy(plateImageClone,
+												plateLikeImageClone);
 										cvResetImageROI(plateImageClone);
-										cvResetImageROI(plateImage);
+										cvResetImageROI(plateLikeImageClone);
 										chars++;
 									}
 								}
@@ -754,6 +793,7 @@ public class VehicleLicenceInputActivity extends Activity {
 
 							// if all chars are found, stop searching!
 							if (chars == 7) {
+								plateImage = plateLikeImageClone;
 								break;
 							}
 

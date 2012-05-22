@@ -4,7 +4,6 @@
 package whutcs.viky.viq;
 
 import android.app.AlertDialog;
-import android.app.ListActivity;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
@@ -43,7 +42,7 @@ import android.widget.TextView;
  * @author xyxzfj@gmail.com
  * 
  */
-public class VehicleQueryListActivity extends ListActivity {
+public class VehicleQueryListActivity extends VehicleBaseListActivity {
 	private static final String TAG = "VehicleQueryListActivity";
 
 	boolean mQuickSearchEnabled = false;
