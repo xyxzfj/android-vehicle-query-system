@@ -21,26 +21,28 @@ public class ViqSQLiteOpenHelper extends SQLiteOpenHelper {
 	public static final String TABLE_INFO = "Info";
 	public static final String VIEW_QUERY_INFO = "QueryInfo";
 	public static final int DB_VERSION = 17;
+	public static final String SPECIAL_COLUMN_LICENCE = "_licence";
 
 	// TABLE QUERY:
 	// The concerned columns of table Query and their index.
-	public static final String[] TABLE_QUERY_COLUMNS_CONCERNED = new String[] {
-			"_id", "time", "place", "note", "photo" };
+	public static final String[] TABLE_QUERY_COLUMNS = new String[] { "_id",
+			"time", "place", "note", "photo" };
 	public static final int TABLE_QUERY_COLUMN_TIME = 1;
 	public static final int TABLE_QUERY_COLUMN_PLACE = 2;
 	public static final int TABLE_QUERY_COLUMN_NOTE = 3;
 	public static final int TABLE_QUERY_COLUMN_PHOTO = 4;
-	public static final String TABLE_QUERY_SELECTION = getSelection(TABLE_QUERY_COLUMNS_CONCERNED);
+	public static final int TABLE_QUERY_COLUMN_LICENCE = 5;
+	public static final String TABLE_QUERY_SELECTION = getSelection(TABLE_QUERY_COLUMNS);
 
 	public static final String[] getTableQuerySelectionArgs(String filter) {
-		return getSelectiionArgs(filter, TABLE_QUERY_COLUMNS_CONCERNED);
+		return getSelectiionArgs(filter, TABLE_QUERY_COLUMNS);
 	}
 
 	// TABLE INFO:
 	// The concerned columns of table Info and their index.
-	public static final String[] TABLE_INFO_COLUMNS_CONCERNED = new String[] {
-			"_id", "licence", "type", "vin", "name", "phone", "gender",
-			"birth", "driving_licence", "note", "photo" };
+	public static final String[] TABLE_INFO_COLUMNS = new String[] { "_id",
+			"licence", "type", "vin", "name", "phone", "gender", "birth",
+			"driving_licence", "note", "photo" };
 	public static final int TABLE_INFO_COLUMN_LICENCE = 1;
 	public static final int TABLE_INFO_COLUMN_TYPE = 2;
 	public static final int TABLE_INFO_COLUMN_VIN = 3;
@@ -51,10 +53,10 @@ public class ViqSQLiteOpenHelper extends SQLiteOpenHelper {
 	public static final int TABLE_INFO_COLUMN_DRIVING_LICENCE = 8;
 	public static final int TABLE_INFO_COLUMN_NOTE = 9;
 	public static final int TABLE_INFO_COLUMN_PHOTO = 10;
-	public static final String TABLE_INFO_SELECTION = getSelection(TABLE_INFO_COLUMNS_CONCERNED);
+	public static final String TABLE_INFO_SELECTION = getSelection(TABLE_INFO_COLUMNS);
 
 	public static final String[] getTableInfoSelectionArgs(String filter) {
-		return getSelectiionArgs(filter, TABLE_INFO_COLUMNS_CONCERNED);
+		return getSelectiionArgs(filter, TABLE_INFO_COLUMNS);
 	}
 
 	// VIEW QUERY_INFO:
@@ -79,9 +81,9 @@ public class ViqSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * The _licence field in table Query serves as a reference to table Info.
 	 */
 	public static final String SQL_CREATE_TABLE_QUERY = genCreateTableSql(
-			TABLE_QUERY, TABLE_QUERY_COLUMNS_CONCERNED, "_licence");
+			TABLE_QUERY, TABLE_QUERY_COLUMNS, SPECIAL_COLUMN_LICENCE);
 	public static final String SQL_CREATE_TABLE_INFO = genCreateTableSql(
-			TABLE_INFO, TABLE_INFO_COLUMNS_CONCERNED, null);
+			TABLE_INFO, TABLE_INFO_COLUMNS, null);
 	public static final String SQL_CREATE_VIEW_QUERY_INFO = "CREATE VIEW QueryInfo AS SELECT Query._id AS _id, _licence AS licence,name,phone,time,place,Query.note AS note,Query.photo AS photo FROM Query LEFT OUTER JOIN Info ON _licence=licence";
 
 	/**

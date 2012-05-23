@@ -1,7 +1,9 @@
 package whutcs.viky.viq;
 
+import static whutcs.viky.viq.ViqCommonUtility.*;
 import android.app.Activity;
 import android.content.ContentValues;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -72,39 +74,31 @@ public class VehicleInfoEditActivity extends Activity {
 		mDrivingLicenceText = (EditText) findViewById(R.id.driving_licence);
 		mNoteText = (EditText) findViewById(R.id.note);
 
-		mID = getIntent().getLongExtra("_id", 0);
+		Intent intent = getIntent();
+		mID = intent.getLongExtra("_id", 0);
 		Log.v(TAG, "_id got:" + mID);
 
 		if (mID != 0) {
 			SQLiteOpenHelper helper = new ViqSQLiteOpenHelper(this);
 			SQLiteDatabase database = helper.getReadableDatabase();
-			Cursor cursor = database.query(ViqSQLiteOpenHelper.TABLE_INFO,
-					ViqSQLiteOpenHelper.TABLE_INFO_COLUMNS_CONCERNED, "_id=?",
-					new String[] { Long.toString(mID) }, null, null, null);
+			Cursor cursor = database.query(TABLE_INFO, TABLE_INFO_COLUMNS,
+					"_id=?", new String[] { Long.toString(mID) }, null, null,
+					null);
 			Log.v(TAG, "cursor count: " + cursor.getCount());
 			if (cursor.getCount() > 0) {
 				cursor.moveToFirst();
 
-				licence = cursor
-						.getString(ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_LICENCE);
-				type = cursor
-						.getString(ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_TYPE);
-				vin = cursor
-						.getString(ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_VIN);
-				name = cursor
-						.getString(ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_NAME);
-				phone = cursor
-						.getString(ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_PHONE);
-				gender = cursor
-						.getString(ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_GENDER);
-				birth = cursor
-						.getString(ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_BIRTH);
+				licence = cursor.getString(TABLE_INFO_COLUMN_LICENCE);
+				type = cursor.getString(TABLE_INFO_COLUMN_TYPE);
+				vin = cursor.getString(TABLE_INFO_COLUMN_VIN);
+				name = cursor.getString(TABLE_INFO_COLUMN_NAME);
+				phone = cursor.getString(TABLE_INFO_COLUMN_PHONE);
+				gender = cursor.getString(TABLE_INFO_COLUMN_GENDER);
+				birth = cursor.getString(TABLE_INFO_COLUMN_BIRTH);
 				drivingLicence = cursor
-						.getString(ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_DRIVING_LICENCE);
-				note = cursor
-						.getString(ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_NOTE);
-				vehicle = cursor
-						.getString(ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_PHOTO);
+						.getString(TABLE_INFO_COLUMN_DRIVING_LICENCE);
+				note = cursor.getString(TABLE_INFO_COLUMN_NOTE);
+				vehicle = cursor.getString(TABLE_INFO_COLUMN_PHOTO);
 				setTexts();
 				setImage();
 			}
@@ -112,6 +106,23 @@ public class VehicleInfoEditActivity extends Activity {
 			database.close();
 			helper.close();
 
+		} else {
+			licence = intent.getStringExtra(EXTRA_LICENCE);
+			Log.v(TAG, "licence: " + licence);
+			vehicle = intent.getStringExtra(EXTRA_VEHICLE);
+			Log.v(TAG, "vehicle: " + vehicle);
+
+			type = "";
+			vin = "";
+			name = "";
+			phone = "";
+			gender = "";
+			birth = "";
+			drivingLicence = "";
+			note = "";
+
+			setTexts();
+			setImage();
 		}
 
 		mImageView.setOnClickListener(new OnImageViewClickListener());
@@ -143,7 +154,7 @@ public class VehicleInfoEditActivity extends Activity {
 	}
 
 	private void setImage() {
-		Bitmap bitmap = ViqImageFetchCacher.getBitmap16(vehicle);
+		Bitmap bitmap = getLoacalBitmapByName(vehicle);
 		mImageView.setImageBitmap(bitmap);
 	}
 
@@ -184,32 +195,40 @@ public class VehicleInfoEditActivity extends Activity {
 		// this's onStop, the info list won't be updated.
 
 		ContentValues values = new ContentValues();
-		values.put("licence", mLicenceText.getText().toString());
-		values.put("type", mTypeText.getText().toString());
-		values.put("vin", mVinText.getText().toString());
-		values.put("name", mNameText.getText().toString());
-		values.put("phone", mPhoneText.getText().toString());
+		values.put(TABLE_INFO_COLUMNS[TABLE_INFO_COLUMN_LICENCE], mLicenceText
+				.getText().toString());
+		values.put(TABLE_INFO_COLUMNS[TABLE_INFO_COLUMN_TYPE], mTypeText
+				.getText().toString());
+		values.put(TABLE_INFO_COLUMNS[TABLE_INFO_COLUMN_VIN], mVinText
+				.getText().toString());
+		values.put(TABLE_INFO_COLUMNS[TABLE_INFO_COLUMN_NAME], mNameText
+				.getText().toString());
+		values.put(TABLE_INFO_COLUMNS[TABLE_INFO_COLUMN_PHONE], mPhoneText
+				.getText().toString());
 		values.put(
-				"gender",
+				TABLE_INFO_COLUMNS[TABLE_INFO_COLUMN_GENDER],
 				mGenderMaleButton.isChecked() ? getString(R.string.male)
 						: mGenderFemaleButton.isChecked() ? getString(R.string.female)
 								: null);
-		values.put("birth", mBirthText.getText().toString());
-		values.put("driving_licence", mDrivingLicenceText.getText().toString());
-		values.put("note", mNoteText.getText().toString());
+		values.put(TABLE_INFO_COLUMNS[TABLE_INFO_COLUMN_BIRTH], mBirthText
+				.getText().toString());
+		values.put(TABLE_INFO_COLUMNS[TABLE_INFO_COLUMN_DRIVING_LICENCE],
+				mDrivingLicenceText.getText().toString());
+		values.put(TABLE_INFO_COLUMNS[TABLE_INFO_COLUMN_NOTE], mNoteText
+				.getText().toString());
+		values.put(TABLE_INFO_COLUMNS[TABLE_INFO_COLUMN_PHOTO], vehicle);
 
 		SQLiteOpenHelper helper = new ViqSQLiteOpenHelper(this);
 		SQLiteDatabase database = helper.getWritableDatabase();
 
 		long result;
 		if (mID != 0) {
-			result = database.update(ViqSQLiteOpenHelper.TABLE_INFO, values,
-					"_id=?", new String[] { Long.toString(mID) });
+			result = database.update(TABLE_INFO, values, "_id=?",
+					new String[] { Long.toString(mID) });
 			Log.v(TAG, "rows updated: " + result);
 
 		} else {
-			result = database.insert(ViqSQLiteOpenHelper.TABLE_INFO, null,
-					values);
+			result = database.insert(TABLE_INFO, null, values);
 			Log.v(TAG, "row id inserted: " + result);
 
 		}

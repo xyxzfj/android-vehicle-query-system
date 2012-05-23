@@ -1,5 +1,7 @@
 package whutcs.viky.viq;
 
+import static whutcs.viky.viq.ViqCommonUtility.*;
+
 // Search methods or constants at http://code.google.com/p/javacv/source/search?q=&origq=&btnG=Search+Trunk to get their full package path.
 import static com.googlecode.javacv.cpp.opencv_core.CV_32FC1;
 import static com.googlecode.javacv.cpp.opencv_core.CV_RGB;
@@ -211,15 +213,15 @@ public class VehicleLicenceInputActivity extends Activity {
 		public void onClick(View v) {
 			StringBuilder builder = new StringBuilder();
 			for (int col = 0; col < PLATECHARS; col++) {
-				builder.append(mCandidateChars[mSelections[col]][col]);
+				builder.append(mCandidateChars[mSelections[0]][col]);
 			}
 			String licence = builder.toString();
 
 			Intent itemShowIntent = new Intent(
 					VehicleLicenceInputActivity.this,
 					VehicleItemViewActivity.class);
-			itemShowIntent.putExtra("licence", licence).putExtra("vehicle",
-					mVehicleImageFile.getName());
+			itemShowIntent.putExtra(EXTRA_LICENCE, licence).putExtra(
+					EXTRA_VEHICLE, mVehicleImageFile.getName());
 			startActivity(itemShowIntent);
 		}
 	}
@@ -422,14 +424,14 @@ public class VehicleLicenceInputActivity extends Activity {
 		String tessPath = "/mnt/sdcard/tesseract/";
 		String langCnl = "cnl";
 		String langSuffix = ".traineddata";
-		String langFileName = langCnl + langSuffix;
+		String langName = langCnl + langSuffix;
 		File tessDataDir = new File(tessPath, "tessdata");
 		if (!tessDataDir.exists()) {
 			tessDataDir.mkdirs();
 			// copy assets/cnl.traineddata to /mnt/sdcard/tesseract/tessdata/
 			try {
-				InputStream is = getAssets().open(langFileName);
-				File tessDataFile = new File(tessDataDir, langFileName);
+				InputStream is = getAssets().open(langName);
+				File tessDataFile = new File(tessDataDir, langName);
 				try {
 					OutputStream os = new FileOutputStream(tessDataFile);
 					streamCopy(is, os);

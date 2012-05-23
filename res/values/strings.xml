@@ -86,5 +86,6 @@
     <string name="revert">撤消</string>
     <string name="no_cnl">语言包cnl.traineddata不存在！</string>
     <string name="vehicle_query_system">车辆查询系统</string>
+    <string name="add_to_vehicle_info_list">增至车辆数据库</string>
 
 </resources>

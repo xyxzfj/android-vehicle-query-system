@@ -1,11 +1,11 @@
 package whutcs.viky.viq;
 
-import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO;
-import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMNS_CONCERNED;
-import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_PHOTO;
-import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_SELECTION;
+import static whutcs.viky.viq.ViqCommonUtility.*;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.text.ClipboardManager;
 import android.util.Log;
@@ -16,6 +16,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.ListView;
 
 /**
  * Show a list of all vehicles' information, the basic information of the
@@ -25,7 +26,7 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
  * @author xyxzfj@gmail.com
  * 
  */
-public class VehicleInfoListActivity extends ViqShakeBaseListActicity {
+public class VehicleInfoListActivity extends ViqBaseShakeableListActivity {
 	private static final String TAG = "VehicleInfoListActivity";
 	private AdapterContextMenuInfo mContextMenuInfo;
 
@@ -41,20 +42,29 @@ public class VehicleInfoListActivity extends ViqShakeBaseListActicity {
 
 	@Override
 	protected void setFrom() {
-		setFrom(TABLE_INFO_COLUMNS_CONCERNED);
+		setFrom(TABLE_INFO_COLUMNS);
 	}
 
 	@Override
 	protected void setTo() {
-		int[] to = new int[] { R.id.rowid, R.id.licence, R.id.type, R.id.vin,
+		setTo(new int[] { R.id.rowid, R.id.licence, R.id.type, R.id.vin,
 				R.id.name, R.id.phone, R.id.gender, R.id.birth,
-				R.id.dirving_licence, R.id.note, R.id.vehicle };
-		setTo(to);
+				R.id.dirving_licence, R.id.note, R.id.vehicle });
 	}
 
 	@Override
 	protected void setSelection() {
 		setSelection(TABLE_INFO_SELECTION);
+	}
+
+	@Override
+	protected void setSelectionArgs() {
+		setSelectionArgs(getTableInfoSelectionArgs(getFilter()));
+	}
+
+	@Override
+	protected void setOrderBy() {
+		setOrderBy(TABLE_INFO_COLUMNS[TABLE_INFO_COLUMN_LICENCE]);
 	}
 
 	@Override
@@ -74,6 +84,8 @@ public class VehicleInfoListActivity extends ViqShakeBaseListActicity {
 			public void onClick(View v) {
 				startActivity(new Intent(VehicleInfoListActivity.this,
 						VehicleQueryListActivity.class));
+				// Switch rather than move from one activity to another.
+				finish();
 			}
 		});
 	}
@@ -109,24 +121,16 @@ public class VehicleInfoListActivity extends ViqShakeBaseListActicity {
 		Cursor cursor = (Cursor) getListAdapter().getItem(position);
 		String _id = cursor.getString(cursor.getColumnIndex("_id"));
 		Log.v(TAG, "_id at position " + position + ", id " + id + " is " + _id);
-		String licence = cursor
-				.getString(ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_LICENCE);
-		String type = cursor
-				.getString(ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_TYPE);
-		String vin = cursor
-				.getString(ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_VIN);
-		String name = cursor
-				.getString(ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_NAME);
-		String phone = cursor
-				.getString(ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_PHONE);
-		String gender = cursor
-				.getString(ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_GENDER);
-		String birth = cursor
-				.getString(ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_BIRTH);
+		String licence = cursor.getString(TABLE_INFO_COLUMN_LICENCE);
+		String type = cursor.getString(TABLE_INFO_COLUMN_TYPE);
+		String vin = cursor.getString(TABLE_INFO_COLUMN_VIN);
+		String name = cursor.getString(TABLE_INFO_COLUMN_NAME);
+		String phone = cursor.getString(TABLE_INFO_COLUMN_PHONE);
+		String gender = cursor.getString(TABLE_INFO_COLUMN_GENDER);
+		String birth = cursor.getString(TABLE_INFO_COLUMN_BIRTH);
 		String drivingLicence = cursor
-				.getString(ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_DRIVING_LICENCE);
-		String note = cursor
-				.getString(ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_NOTE);
+				.getString(TABLE_INFO_COLUMN_DRIVING_LICENCE);
+		String note = cursor.getString(TABLE_INFO_COLUMN_NOTE);
 
 		StringBuilder builder = new StringBuilder();
 		String comma = getString(R.string.comma) + " ";
@@ -142,7 +146,7 @@ public class VehicleInfoListActivity extends ViqShakeBaseListActicity {
 		switch (item.getItemId()) {
 		case R.id.menu_view:
 			startActivity(new Intent(this, VehicleItemViewActivity.class)
-					.putExtra("licence", licence));
+					.putExtra(EXTRA_LICENCE, licence));
 			break;
 		case R.id.menu_edit:
 			startActivity(new Intent(this, VehicleInfoEditActivity.class)
@@ -192,6 +196,42 @@ public class VehicleInfoListActivity extends ViqShakeBaseListActicity {
 
 		Log.v(TAG, clipboard.getText().toString());
 		return result;
+	}
+
+	@Override
+	protected void onListItemClick(ListView l, View v, int position, long id) {
+		super.onListItemClick(l, v, position, id);
+		Cursor cursor = (Cursor) getListAdapter().getItem(position);
+		String licence = cursor.getString(TABLE_INFO_COLUMN_LICENCE);
+
+		startActivity(new Intent(this, VehicleItemViewActivity.class).putExtra(
+				EXTRA_LICENCE, licence));
+	}
+
+	@Override
+	protected void deleteItem(final long id, String name) {
+		new AlertDialog.Builder(this)
+				.setTitle(getString(R.string.delete_confirm) + " " + name)
+				.setPositiveButton(R.string.ok,
+						new DialogInterface.OnClickListener() {
+
+							public void onClick(DialogInterface dialog,
+									int which) {
+								ViqSQLiteOpenHelper helper = new ViqSQLiteOpenHelper(
+										VehicleInfoListActivity.this);
+								SQLiteDatabase database = helper
+										.getWritableDatabase();
+								int deleted = database.delete(TABLE_INFO,
+										"_id=?",
+										new String[] { Long.toString(id) });
+								Log.v(TAG, deleted + " deleted!");
+								database.close();
+								helper.close();
+								refreshListView();
+							}
+
+						}).setNegativeButton(R.string.cancel, null).show();
+
 	}
 
 }

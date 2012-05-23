@@ -35,8 +35,8 @@
 
             <ImageView
                 android:id="@+id/vehicle_image"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
                 android:layout_gravity="center_horizontal"
                 android:contentDescription="@string/vehicle_image" />
 

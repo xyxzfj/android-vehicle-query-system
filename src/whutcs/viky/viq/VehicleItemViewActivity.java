@@ -1,12 +1,35 @@
 package whutcs.viky.viq;
 
+import static whutcs.viky.viq.ViqCommonUtility.*;
+import static whutcs.viky.viq.ViqCommonUtility.EXTRA_VEHICLE;
+import static whutcs.viky.viq.ViqCommonUtility.getDataTimeString;
+import static whutcs.viky.viq.ViqCommonUtility.getGpsString;
+import static whutcs.viky.viq.ViqCommonUtility.getLoacalBitmap;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.SPECIAL_COLUMN_LICENCE;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMNS;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_BIRTH;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_DRIVING_LICENCE;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_GENDER;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_NAME;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_NOTE;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_PHONE;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_PHOTO;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_TYPE;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_VIN;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY_COLUMNS;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY_COLUMN_PHOTO;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY_COLUMN_PLACE;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY_COLUMN_TIME;
 import android.app.AlertDialog;
-import android.app.ListActivity;
+import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -18,7 +41,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
-import android.widget.LinearLayout;
+import android.widget.SimpleCursorAdapter.ViewBinder;
+import android.widget.ImageView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -26,87 +50,125 @@ import android.widget.Toast;
 /**
  * Query the database with the given licence number and show its vehicle's and
  * owner's basic information and its historical queries. If none, redirect to
- * VehicleInfoEditActivity.
+ * VehicleInfoEditActivity to create one.
  * 
  * @author xyxzfj@gmail.com
  * 
  */
-public class VehicleItemViewActivity extends ListActivity {
+public class VehicleItemViewActivity extends ViqShakeableListActicity {
 	private static final String TAG = "VehicleItemViewActivity";
 
-	String mLicence;
-	String mPhone = null;
+	private String mLicence;
+	private String mVehicle;
+	String mPhone;
 
 	ViqSQLiteOpenHelper mHelper;
+
+	private final String mTableName = TABLE_QUERY;
+
+	private final String[] mFrom = TABLE_QUERY_COLUMNS;
+
+	private final String mOrderBy = "_id DESC";
+
+	private final int mListItemId = R.layout.vehicle_item_query_list_item;
+
+	private final int[] mTo = new int[] { R.id.rowid, R.id.time, R.id.place,
+			R.id.note, R.drawable.vehicle };
+
+	protected int mColumnPhoto = VIEW_QUERY_INFO_COLUMN_PHOTO;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.vehicle_item_view);
 
-		mLicence = getIntent().getStringExtra("licence");
+		Intent intent = getIntent();
+		mLicence = intent.getStringExtra(EXTRA_LICENCE);
+		mVehicle = intent.getStringExtra(EXTRA_VEHICLE);
 		Log.v(TAG, "licence:" + mLicence);
+		Log.v(TAG, "vehicle: " + mVehicle);
+
 		if (mLicence == null) {
-			Toast.makeText(this,
-					"No licence specified! Will goto vehicle database.",
-					Toast.LENGTH_SHORT).show();
 			startActivity(new Intent(this, VehicleInfoListActivity.class));
 			finish();
 			return;
 		}
 
+		if (mVehicle != null) {
+			createQueryRecord();
+		}
+
 		mHelper = new ViqSQLiteOpenHelper(this);
 		SQLiteDatabase database = mHelper.getReadableDatabase();
 
-		LinearLayout basicInfoLayout = (LinearLayout) findViewById(R.id.basic_info);
-		Cursor infoCursor = database.query(ViqSQLiteOpenHelper.TABLE_INFO,
-				ViqSQLiteOpenHelper.TABLE_INFO_COLUMNS_CONCERNED, "licence=?",
-				new String[] { mLicence }, null, null, null);
-		if (infoCursor.getCount() > 0) {
-			// basicInfoLayout.setVisibility(View.VISIBLE);
-			infoCursor.moveToFirst();
-			mPhone = infoCursor
-					.getString(ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_PHONE);
+		Cursor infoCursor = database.query(TABLE_INFO, TABLE_INFO_COLUMNS,
+				"licence=?", new String[] { mLicence }, null, null, null);
 
-			((TextView) findViewById(R.id.licence)).setText(mLicence);
-			((TextView) findViewById(R.id.type)).setText(infoCursor
-					.getString(ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_TYPE));
-			((TextView) findViewById(R.id.vin)).setText(infoCursor
-					.getString(ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_VIN));
-			((TextView) findViewById(R.id.name)).setText(infoCursor
-					.getString(ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_NAME));
-			((TextView) findViewById(R.id.phone)).setText(mPhone);
-			((TextView) findViewById(R.id.gender)).setText(infoCursor
-					.getString(ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_GENDER));
-			((TextView) findViewById(R.id.birth)).setText(infoCursor
-					.getString(ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_BIRTH));
-			((TextView) findViewById(R.id.dirving_licence))
-					.setText(infoCursor
-							.getString(ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_DRIVING_LICENCE));
-			((TextView) findViewById(R.id.note)).setText(infoCursor
-					.getString(ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_NOTE));
-		} else {
-			// basicInfoLayout.setVisibility(View.GONE);
-			String vehicleImageName = getIntent().getStringExtra("vehicle");
-			startActivity(new Intent(this, VehicleInfoEditActivity.class)
-					.putExtra("licence", mLicence).putExtra("vehicle",
-							vehicleImageName));
+		setContentView(R.layout.vehicle_item_view);
+
+		infoCursor.moveToFirst();
+		mPhone = infoCursor.getString(TABLE_INFO_COLUMN_PHONE);
+
+		((TextView) findViewById(R.id.licence)).setText(mLicence);
+		((TextView) findViewById(R.id.type)).setText(infoCursor
+				.getString(TABLE_INFO_COLUMN_TYPE));
+		((TextView) findViewById(R.id.vin)).setText(infoCursor
+				.getString(TABLE_INFO_COLUMN_VIN));
+		((TextView) findViewById(R.id.name)).setText(infoCursor
+				.getString(TABLE_INFO_COLUMN_NAME));
+		((TextView) findViewById(R.id.phone)).setText(mPhone);
+		((TextView) findViewById(R.id.gender)).setText(infoCursor
+				.getString(TABLE_INFO_COLUMN_GENDER));
+		((TextView) findViewById(R.id.birth)).setText(infoCursor
+				.getString(TABLE_INFO_COLUMN_BIRTH));
+		((TextView) findViewById(R.id.dirving_licence)).setText(infoCursor
+				.getString(TABLE_INFO_COLUMN_DRIVING_LICENCE));
+		((TextView) findViewById(R.id.note)).setText(infoCursor
+				.getString(TABLE_INFO_COLUMN_NOTE));
+		String imageName = infoCursor.getString(TABLE_INFO_COLUMN_PHOTO);
+		Bitmap bitmap = getLoacalBitmap(imageName);
+		if (bitmap != null) {
+			((ImageView) findViewById(R.id.vehicle)).setImageBitmap(bitmap);
 		}
 
-		Cursor queryCursor = database
-				.query(ViqSQLiteOpenHelper.TABLE_QUERY,
-						ViqSQLiteOpenHelper.TABLE_QUERY_COLUMNS_CONCERNED,
-						"_licence=?", new String[] { mLicence }, null, null,
-						"_id DESC");
-		SimpleCursorAdapter adapter = new SimpleCursorAdapter(this,
-				R.layout.vehicle_item_query_list_item, queryCursor,
-				ViqSQLiteOpenHelper.TABLE_QUERY_COLUMNS_CONCERNED, new int[] {
-						R.id.rowid, R.id.time, R.id.place, R.id.note,
-						R.drawable.vehicle });
-		setListAdapter(adapter);
-		database.close();
-
 		registerForContextMenu(getListView());
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+
+		refreshListView();
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		Log.v(TAG, "onDestroy");
+
+		SimpleCursorAdapter adapter = (SimpleCursorAdapter) getListView()
+				.getAdapter();
+		Cursor cursor = adapter.getCursor();
+		cursor.close();
+		mHelper.close();
+	}
+
+	private void createQueryRecord() {
+		String datetime = getDataTimeString();
+		String gps = getGpsString(this);
+
+		ContentValues values = new ContentValues();
+		values.put(TABLE_QUERY_COLUMNS[TABLE_QUERY_COLUMN_PHOTO], mVehicle);
+		values.put(TABLE_QUERY_COLUMNS[TABLE_QUERY_COLUMN_TIME],
+				getDataTimeString());
+		values.put(TABLE_QUERY_COLUMNS[TABLE_QUERY_COLUMN_PLACE], gps);
+		values.put(SPECIAL_COLUMN_LICENCE, mLicence);
+
+		ViqSQLiteOpenHelper helper = new ViqSQLiteOpenHelper(this);
+		SQLiteDatabase database = helper.getWritableDatabase();
+		long rowid = database.insert(TABLE_QUERY, null, values);
+		Log.v(TAG, "rowid: " + rowid);
+		database.close();
+		helper.close();
 	}
 
 	@Override
@@ -130,8 +192,7 @@ public class VehicleItemViewActivity extends ListActivity {
 
 		// Retrieve the cursor (row) that defines this item.
 		Cursor cursor = (Cursor) getListAdapter().getItem(position);
-		String time = cursor
-				.getString(ViqSQLiteOpenHelper.TABLE_QUERY_COLUMN_TIME);
+		String time = cursor.getString(TABLE_QUERY_COLUMN_TIME);
 
 		switch (item.getItemId()) {
 		case R.id.menu_edit:
@@ -153,7 +214,7 @@ public class VehicleItemViewActivity extends ListActivity {
 		boolean result = super.onCreateOptionsMenu(menu);
 
 		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.vehicle_item_query_list_options_menu, menu);
+		inflater.inflate(R.menu.vehicle_item_view_options_menu, menu);
 
 		return result;
 	}
@@ -174,6 +235,11 @@ public class VehicleItemViewActivity extends ListActivity {
 				startActivity(new Intent(Intent.ACTION_CALL).setData(Uri
 						.parse("tel:" + mPhone)));
 			}
+			break;
+		case R.id.menu_add_to_vehicle_info_list:
+			startActivity(new Intent(this, VehicleInfoEditActivity.class)
+					.putExtra(EXTRA_LICENCE, mLicence).putExtra(EXTRA_VEHICLE,
+							mVehicle));
 			break;
 		default:
 			break;
@@ -197,8 +263,7 @@ public class VehicleItemViewActivity extends ListActivity {
 
 					public void onClick(DialogInterface dialog, int which) {
 						SQLiteDatabase database = mHelper.getWritableDatabase();
-						int deleted = database.delete(
-								ViqSQLiteOpenHelper.TABLE_QUERY, "_id=?",
+						int deleted = database.delete(TABLE_QUERY, "_id=?",
 								new String[] { Long.toString(id) });
 						Log.v(TAG, deleted + " deleted!");
 						database.close();
@@ -208,18 +273,49 @@ public class VehicleItemViewActivity extends ListActivity {
 	}
 
 	/**
-	 * Refresh the list view with the latest data from the database.
+	 * Load or Reload the list view with the latest filtered data from the
+	 * database. Update mMatchesView by the way.
 	 */
 	protected void refreshListView() {
+		// Should never be closed explicitly until onDestroy().
+		Cursor cursor;
+
 		SQLiteDatabase database = mHelper.getReadableDatabase();
-		Cursor queryCursor = database
-				.query(ViqSQLiteOpenHelper.TABLE_QUERY,
-						ViqSQLiteOpenHelper.TABLE_QUERY_COLUMNS_CONCERNED,
-						"_licence=?", new String[] { mLicence }, null, null,
-						"_id DESC");
+		// Get the cursor.
+		cursor = database.query(mTableName, mFrom, null, null, null, null,
+				mOrderBy);
+		// Bind or rebind the cursor to the list adapter.
 		SimpleCursorAdapter adapter = (SimpleCursorAdapter) getListAdapter();
-		adapter.changeCursor(queryCursor);
-		adapter.notifyDataSetChanged();
+		if (adapter == null) {
+			adapter = new SimpleCursorAdapter(this, mListItemId, cursor, mFrom,
+					mTo);
+			adapter.setViewBinder(new ViewBinder() {
+				public boolean setViewValue(View view, Cursor cursor,
+						int columnIndex) {
+					boolean result = false;
+					if (columnIndex == mColumnPhoto) {
+						final ImageView imageView = (ImageView) view;
+						final String imageName = cursor.getString(columnIndex);
+						if (imageName != null) {
+							// set image in new thread
+							ViqImageFetchCacher fetchCacher = new ViqImageFetchCacher(
+									imageName, imageView);
+							fetchCacher.run();
+							result = true;
+						} else {
+							imageView.setImageResource(R.drawable.vehicle);
+						}
+					}
+					return result;
+				}
+			});
+
+			setListAdapter(adapter);
+		} else {
+			// Will close the previous cursor.
+			adapter.changeCursor(cursor);
+			adapter.notifyDataSetChanged();
+		}
 		database.close();
 	}
 }
