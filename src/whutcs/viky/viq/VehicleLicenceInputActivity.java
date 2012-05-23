@@ -38,28 +38,27 @@ import static com.googlecode.javacv.cpp.opencv_imgproc.cvMinAreaRect2;
 import static com.googlecode.javacv.cpp.opencv_imgproc.cvSmooth;
 import static com.googlecode.javacv.cpp.opencv_imgproc.cvThreshold;
 import static com.googlecode.javacv.cpp.opencv_imgproc.cvWarpAffine;
+import static whutcs.viky.viq.ViqCommonUtility.fileCopy;
+import static whutcs.viky.viq.ViqCommonUtility.getDcimDirectory;
+import static whutcs.viky.viq.ViqCommonUtility.getLoacalBitmap;
+import static whutcs.viky.viq.ViqCommonUtility.getNewImageFile;
+import static whutcs.viky.viq.ViqCommonUtility.streamCopy;
+import static whutcs.viky.viq.ViqCommonUtility.uriToImageName;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 
 import android.app.Activity;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.InputFilter;
@@ -100,11 +99,6 @@ import com.googlecode.tesseract.android.TessBaseAPI;
  */
 public class VehicleLicenceInputActivity extends Activity {
 	private static final String TAG = "VehicleLicenceInputActivity";
-
-	/**
-	 * The dicharRectory in /sdcard/DCIM to save taken vehicle images.
-	 */
-	public static final File DIRECTORY_VIQ = getDcimDirectory("AndroidVIQ");
 
 	// TODO: set false when publishing
 	private static final boolean SAVE_IMG = true;
@@ -208,32 +202,6 @@ public class VehicleLicenceInputActivity extends Activity {
 		}
 	}
 
-	public static boolean fileCopy(File srcFile, File objFile) {
-		boolean result;
-		InputStream iStream;
-		try {
-			iStream = new FileInputStream(srcFile);
-			OutputStream oStream = new FileOutputStream(objFile);
-			streamCopy(iStream, oStream);
-			iStream.close();
-			oStream.close();
-			result = true;
-		} catch (IOException e) {
-			e.printStackTrace();
-			result = false;
-		}
-		return result;
-	}
-
-	public static void streamCopy(InputStream is, OutputStream os)
-			throws IOException {
-		byte[] buffer = new byte[1024];
-		int read;
-		while ((read = is.read(buffer)) > 0) {
-			os.write(buffer, 0, read);
-		}
-	}
-
 	class OnOkClickListener implements OnClickListener {
 
 		/**
@@ -262,49 +230,6 @@ public class VehicleLicenceInputActivity extends Activity {
 			finish();
 		}
 
-	}
-
-	/**
-	 * Get the date time string as a file name.
-	 * 
-	 * @return a unique file name not including the extended name.
-	 */
-	public static String getDateTimeAsFileName() {
-		SimpleDateFormat fileNameFormat = new SimpleDateFormat(
-				"yyyy-MM-dd_HH-mm-ss");
-		String fileName = fileNameFormat.format(new Date(System
-				.currentTimeMillis()));
-		return fileName;
-	}
-
-	/**
-	 * Get the corresponding file of the dicharRectory /sdcard/DCIM/name. Will
-	 * create the dicharRectory if is doesn't exist.
-	 * 
-	 * @param name
-	 *            the dicharRectory name.
-	 * @return the dicharRectory's corresponding file.
-	 */
-	public static File getDcimDirectory(String name) {
-		String dcimPath = Environment.getExternalStoragePublicDirectory(
-				Environment.DIRECTORY_DCIM).getPath();
-		File dicharRectory = new File(dcimPath, name);
-		if (!dicharRectory.exists()) {
-			dicharRectory.mkdirs();
-		}
-		return dicharRectory;
-	}
-
-	/**
-	 * Get a new image file with the path under "DCIM/VIQ" and the name of the
-	 * current date time.
-	 * 
-	 * @return
-	 */
-	public static File getNewImageFile() {
-		String imagePath = getDateTimeAsFileName() + ".jpg";
-		File imageFile = new File(DIRECTORY_VIQ, imagePath);
-		return imageFile;
 	}
 
 	/**
@@ -354,49 +279,6 @@ public class VehicleLicenceInputActivity extends Activity {
 			recogniseImage();
 			showResultForCorcharRecting();
 		}
-	}
-
-	public static String uriToImageName(Context context, Uri uri) {
-		String imagePath = null;
-		String uriString = uri.toString();
-		String uriSchema = uri.getScheme();
-		if (uriSchema.equals(ContentResolver.SCHEME_FILE)) {
-			imagePath = uriString.substring("file://".length());
-		} else {// uriSchema.equals(ContentResolver.SCHEME_CONTENT)
-			ContentResolver resolver = context.getContentResolver();
-			Cursor cursor = resolver.query(uri, null, null, null, null);
-			if (cursor.getCount() == 0) {
-				Log.e(TAG, "Uri(" + uri.toString() + ") not found!");
-				return null;
-			}
-			cursor.moveToFirst();
-			// imagePath = cursor.getString(cursor
-			// .getColumnIndex(MediaStore.Images.ImageColumns.DATA));
-			imagePath = cursor.getString(1);
-			// imagePath =
-			// cursor.getString(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-
-			// Change the SCHEME_CONTENT uri to the SCHEME_FILE.
-			uri = Uri.fromFile(new File(imagePath));
-		}
-		Log.v(TAG, "Final uri: " + uri.toString());
-		return imagePath;
-	}
-
-	/**
-	 * Get a bitmap object from a local image file.
-	 * 
-	 * @param path
-	 *            the path of the local image file.
-	 * @return the bitmap object.
-	 */
-	public static final Bitmap getLoacalBitmap(String path) {
-		final BitmapFactory.Options opts = new BitmapFactory.Options();
-		opts.inPreferredConfig = Bitmap.Config.ARGB_8888;
-
-		final Bitmap bmp = BitmapFactory.decodeFile(path, opts);
-
-		return bmp;
 	}
 
 	public static Bitmap iplImageToBitmap(IplImage src) {

@@ -25,7 +25,8 @@ import android.widget.Toast;
 
 /**
  * Query the database with the given licence number and show its vehicle's and
- * owner's basic information and its historical queries.
+ * owner's basic information and its historical queries. If none, redirect to
+ * VehicleInfoEditActivity.
  * 
  * @author xyxzfj@gmail.com
  * 
