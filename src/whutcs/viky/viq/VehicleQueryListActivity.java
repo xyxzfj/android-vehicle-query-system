@@ -3,7 +3,7 @@
  */
 package whutcs.viky.viq;
 
-import static whutcs.viky.viq.ViqCommonUtility.EXTRA_LICENCE;
+import static whutcs.viky.viq.ViqCommonUtilities.EXTRA_LICENCE;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.VIEW_QUERY_INFO;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.VIEW_QUERY_INFO_COLUMNS;

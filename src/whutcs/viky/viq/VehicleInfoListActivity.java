@@ -1,6 +1,6 @@
 package whutcs.viky.viq;
 
-import static whutcs.viky.viq.ViqCommonUtility.*;
+import static whutcs.viky.viq.ViqCommonUtilities.*;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -148,7 +148,7 @@ public class VehicleInfoListActivity extends ViqBaseShakeableListActivity {
 		switch (item.getItemId()) {
 		case R.id.menu_view:
 			startActivity(new Intent(this, VehicleItemViewActivity.class)
-					.putExtra(EXTRA_LICENCE, licence));
+					.putExtra(EXTRA_ID, id));
 			break;
 		case R.id.menu_edit:
 			startActivity(new Intent(this, VehicleInfoEditActivity.class)

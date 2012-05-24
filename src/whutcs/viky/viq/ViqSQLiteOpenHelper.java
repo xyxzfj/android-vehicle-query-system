@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 /**
- * Provide basic access to the underlying database elements -- tables, views and
+ * Provides access to the underlying database elements -- tables, views and
  * columns.
  * 
  * @author xyxzfj@gmail.com
@@ -20,11 +20,13 @@ public class ViqSQLiteOpenHelper extends SQLiteOpenHelper {
 	public static final String TABLE_QUERY = "Query";
 	public static final String TABLE_INFO = "Info";
 	public static final String VIEW_QUERY_INFO = "QueryInfo";
-	public static final int DB_VERSION = 17;
-	public static final String SPECIAL_COLUMN_LICENCE = "_licence";
+	public static final int DB_VERSION = 18;
 
 	// TABLE QUERY:
-	// The concerned columns of table Query and their index.
+	/**
+	 * Outer-seen Columns of table Query; "_licence" as a special column of
+	 * table Query, not seen out of this class.
+	 */
 	public static final String[] TABLE_QUERY_COLUMNS = new String[] { "_id",
 			"time", "place", "note", "photo" };
 	public static final int TABLE_QUERY_COLUMN_TIME = 1;
@@ -32,6 +34,7 @@ public class ViqSQLiteOpenHelper extends SQLiteOpenHelper {
 	public static final int TABLE_QUERY_COLUMN_NOTE = 3;
 	public static final int TABLE_QUERY_COLUMN_PHOTO = 4;
 	public static final int TABLE_QUERY_COLUMN_LICENCE = 5;
+	public static final String SPECIAL_COLUMN_LICENCE = "_licence";
 	public static final String TABLE_QUERY_SELECTION = getSelection(TABLE_QUERY_COLUMNS);
 
 	public static final String[] getTableQuerySelectionArgs(String filter) {
@@ -39,7 +42,9 @@ public class ViqSQLiteOpenHelper extends SQLiteOpenHelper {
 	}
 
 	// TABLE INFO:
-	// The concerned columns of table Info and their index.
+	/**
+	 * All columns of table Info.
+	 */
 	public static final String[] TABLE_INFO_COLUMNS = new String[] { "_id",
 			"licence", "type", "vin", "name", "phone", "gender", "birth",
 			"driving_licence", "note", "photo" };
@@ -56,7 +61,9 @@ public class ViqSQLiteOpenHelper extends SQLiteOpenHelper {
 	public static final String TABLE_INFO_SELECTION = getSelection(TABLE_INFO_COLUMNS);
 
 	// VIEW QUERY_INFO:
-	// The columns of view QueryInfo and their index.
+	/**
+	 * All columns of view QueryInfo.
+	 */
 	public static final String[] VIEW_QUERY_INFO_COLUMNS = new String[] {
 			"_id", "licence", "name", "phone", "time", "place", "note", "photo" };
 	public static final int VIEW_QUERY_INFO_COLUMN_LICENCE = 1;
@@ -88,7 +95,7 @@ public class ViqSQLiteOpenHelper extends SQLiteOpenHelper {
 	 *            example column only for JOIN and never used after SELECT. Null
 	 *            if no such a column.
 	 * @param columnsWithIDFirst
-	 *            a string array of columns with "_id" the first.
+	 *            a string array of columns with "_id" the zero place.
 	 * @return the creation sql.
 	 */
 	private static String genCreateTableSql(String tableName,
@@ -115,15 +122,14 @@ public class ViqSQLiteOpenHelper extends SQLiteOpenHelper {
 	}
 
 	/**
-	 * Generate a selection clause of OR with all columns except the first one "
-	 * LIKE %?% ".
+	 * Generate a selection clause of OR with all columns " LIKE %?% ".
 	 * 
 	 * @param tableInfoColumnsConcerned
 	 * @return
 	 */
 	private static String getSelection(String[] columnsWithIDFirst) {
 		StringBuilder builder = new StringBuilder();
-		for (int i = 1; i < columnsWithIDFirst.length - 1; i++) {
+		for (int i = 0; i < columnsWithIDFirst.length - 1; i++) {
 			builder.append(columnsWithIDFirst[i]);
 			builder.append(" LIKE ? OR ");
 		}
@@ -140,7 +146,7 @@ public class ViqSQLiteOpenHelper extends SQLiteOpenHelper {
 	 */
 	public static String[] getSelectiionArgs(String filter,
 			String[] columnsWithIDFirst) {
-		String[] selectionArgs = new String[columnsWithIDFirst.length - 1];
+		String[] selectionArgs = new String[columnsWithIDFirst.length];
 		for (int i = 0; i < selectionArgs.length; i++) {
 			selectionArgs[i] = "%" + filter + "%";
 		}
@@ -170,10 +176,13 @@ public class ViqSQLiteOpenHelper extends SQLiteOpenHelper {
 	}
 
 	void sampleInsert(SQLiteDatabase db) {
-		db.execSQL("INSERT INTO Info VALUES(null,'鄂A12301','A1','LSGPC52U7AF127561','车主1','13667147301','男','1989年1月','371322198701202301','备注1','2012-05-22_18-41-32.jpg')");
-		db.execSQL("INSERT INTO Info VALUES(null,'鄂A12302','A2','LSGPC52U7AF127562','车主2','13667147302','男','1989年2月','371322198701202302','备注2','2012-05-22_18-49-13.jpg')");
-		db.execSQL("INSERT INTO Info VALUES(null,'鄂A12303','A3','LSGPC52U7AF127563','车主3','13667147303','男','1989年3月','371322198701202303','备注3','2012-05-22_18-49-38.jpg')");
-		db.execSQL("INSERT INTO Info VALUES(null,'鄂A12304','A4','LSGPC52U7AF127564','车主4','13667147304','男','1989年4月','371322198701202304','备注4','IMG_20120220_073130.jpg')");
+		db.execSQL("INSERT INTO Info VALUES(null,'鄂A12245','A1','LSGPC52U7AF127561','小杨','13667147300','男','1989-11','371322198701202314','有醉酒驾车前科','2012-05-22_18-41-32.jpg')");
+		db.execSQL("INSERT INTO Info VALUES(null,'鄂A12246','A2','LSGPC52U7AF127562','王小杨','13667147311','女','1989-11','371322198701202311','2012年5月新学会开车','IMG_20120304_143047.jpg')");
+
+		db.execSQL("INSERT INTO Info VALUES(null,'鄂A12301','A1','LSGPC52U7AF127561','车主1','13667147301','男','1989年1月','371322198701202301','备注1','IMG_20120220_073130.jpg')");
+		db.execSQL("INSERT INTO Info VALUES(null,'鄂A12302','A2','LSGPC52U7AF127562','车主2','13667147302','男','1989年2月','371322198701202302','备注2','IMG_20120304_142701.jpg')");
+		db.execSQL("INSERT INTO Info VALUES(null,'鄂A12303','A3','LSGPC52U7AF127563','车主3','13667147303','男','1989年3月','371322198701202303','备注3','IMG_20120304_143026.jpg')");
+		db.execSQL("INSERT INTO Info VALUES(null,'鄂A12304','A4','LSGPC52U7AF127564','车主4','13667147304','男','1989年4月','371322198701202304','备注4','2012-05-22_18-49-38.jpg')");
 		db.execSQL("INSERT INTO Info VALUES(null,'鄂A12305','A5','LSGPC52U7AF127565','车主5','13667147305','男','1989年5月','371322198701202305','备注5','IMG_20120220_073139.jpg')");
 		db.execSQL("INSERT INTO Info VALUES(null,'鄂A12306','A6','LSGPC52U7AF127566','车主6','13667147306','男','1989年6月','371322198701202306','备注6','IMG_20120220_073148.jpg')");
 		db.execSQL("INSERT INTO Info VALUES(null,'鄂A12307','A7','LSGPC52U7AF127567','车主7','13667147307','男','1989年7月','371322198701202307','备注7','IMG_20120220_073157.jpg')");
@@ -221,62 +230,59 @@ public class ViqSQLiteOpenHelper extends SQLiteOpenHelper {
 		db.execSQL("INSERT INTO Info VALUES(null,'鄂A12349','A9','LSGPC52U7AF127609','车主49','13667147349','女','1993年1月','371322198701202349','备注49',null)");
 		db.execSQL("INSERT INTO Info VALUES(null,'鄂A12350','A0','LSGPC52U7AF127610','车主50','13667147350','女','1993年2月','371322198701202350','备注50',null)");
 
-		db.execSQL("INSERT INTO Info VALUES(null,'鄂A12245','A1','LSGPC52U7AF127561','小杨','13667147300','男','1989-11','371322198701202314','有醉酒驾车前科',null)");
-		db.execSQL("INSERT INTO Info VALUES(null,'鄂A12246','A2','LSGPC52U7AF127562','王小杨','13667147311','女','1989-11','371322198701202311',null,null)");
-
-		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:18','湖北省武汉市青山区武汉理工大学地点1','备注1',null,'鄂A12301')");
-		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:19','湖北省武汉市青山区武汉理工大学地点2','备注2',null,'鄂A12301')");
-		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:20','湖北省武汉市青山区武汉理工大学地点3','备注3',null,'鄂A12301')");
+		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:18','湖北省武汉市青山区武汉理工大学地点1','备注1',null,'鄂A12302')");
+		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:19','湖北省武汉市青山区武汉理工大学地点2','备注2',null,'鄂A12303')");
+		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:20','湖北省武汉市青山区武汉理工大学地点3','备注3',null,'鄂A12302')");
 		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:21','湖北省武汉市青山区武汉理工大学地点4','备注4',null,'鄂A12301')");
-		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:22','湖北省武汉市青山区武汉理工大学地点5','备注5',null,'鄂A12301')");
-		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:23','湖北省武汉市青山区武汉理工大学地点6','备注6',null,'鄂A12301')");
-		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:24','湖北省武汉市青山区武汉理工大学地点7','备注7',null,'鄂A12301')");
+		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:22','湖北省武汉市青山区武汉理工大学地点5','备注5',null,'鄂A12303')");
+		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:23','湖北省武汉市青山区武汉理工大学地点6','备注6',null,'鄂A12302')");
+		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:24','湖北省武汉市青山区武汉理工大学地点7','备注7',null,'鄂A12302')");
 		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:25','湖北省武汉市青山区武汉理工大学地点8','备注8',null,'鄂A12301')");
 		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:26','湖北省武汉市青山区武汉理工大学地点9','备注9',null,'鄂A12301')");
 		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:27','湖北省武汉市青山区武汉理工大学地点10','备注10',null,'鄂A12301')");
-		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:28','湖北省武汉市青山区武汉理工大学地点11','备注11',null,'鄂A12301')");
-		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:29','湖北省武汉市青山区武汉理工大学地点12','备注12',null,'鄂A12301')");
+		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:28','湖北省武汉市青山区武汉理工大学地点11','备注11',null,'鄂A12303')");
+		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:29','湖北省武汉市青山区武汉理工大学地点12','备注12',null,'鄂A12302')");
 		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:30','湖北省武汉市青山区武汉理工大学地点13','备注13',null,'鄂A12301')");
 		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:31','湖北省武汉市青山区武汉理工大学地点14','备注14',null,'鄂A12301')");
 		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:32','湖北省武汉市青山区武汉理工大学地点15','备注15',null,'鄂A12301')");
 		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:33','湖北省武汉市青山区武汉理工大学地点16','备注16',null,'鄂A12301')");
-		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:34','湖北省武汉市青山区武汉理工大学地点17','备注17',null,'鄂A12301')");
+		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:34','湖北省武汉市青山区武汉理工大学地点17','备注17',null,'鄂A12303')");
 		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:35','湖北省武汉市青山区武汉理工大学地点18','备注18',null,'鄂A12301')");
 		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:36','湖北省武汉市青山区武汉理工大学地点19','备注19',null,'鄂A12301')");
-		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:37','湖北省武汉市青山区武汉理工大学地点20','备注20',null,'鄂A12301')");
-		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:38','湖北省武汉市青山区武汉理工大学地点21','备注21',null,'鄂A12301')");
-		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:39','湖北省武汉市青山区武汉理工大学地点22','备注22',null,'鄂A12301')");
-		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:40','湖北省武汉市青山区武汉理工大学地点23','备注23',null,'鄂A12301')");
+		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:37','湖北省武汉市青山区武汉理工大学地点20','备注20',null,'鄂A12302')");
+		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:38','湖北省武汉市青山区武汉理工大学地点21','备注21',null,'鄂A12302')");
+		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:39','湖北省武汉市青山区武汉理工大学地点22','备注22',null,'鄂A12302')");
+		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:40','湖北省武汉市青山区武汉理工大学地点23','备注23',null,'鄂A12303')");
 		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:41','湖北省武汉市青山区武汉理工大学地点24','备注24',null,'鄂A12301')");
-		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:42','湖北省武汉市青山区武汉理工大学地点25','备注25',null,'鄂A12301')");
+		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:42','湖北省武汉市青山区武汉理工大学地点25','备注25',null,'鄂A12302')");
 		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:43','湖北省武汉市青山区武汉理工大学地点26','备注26',null,'鄂A12301')");
-		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:44','湖北省武汉市青山区武汉理工大学地点27','备注27',null,'鄂A12301')");
+		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:44','湖北省武汉市青山区武汉理工大学地点27','备注27','IMG_20120304_142901.jpg,'鄂A12304')");
 		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:45','湖北省武汉市青山区武汉理工大学地点28','备注28',null,'鄂A12301')");
 		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:46','湖北省武汉市青山区武汉理工大学地点29','备注29',null,'鄂A12301')");
 		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:47','湖北省武汉市青山区武汉理工大学地点30','备注30',null,'鄂A12301')");
 		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:48','湖北省武汉市青山区武汉理工大学地点31','备注31',null,'鄂A12301')");
-		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:49','湖北省武汉市青山区武汉理工大学地点32','备注32',null,'鄂A12301')");
-		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:50','湖北省武汉市青山区武汉理工大学地点33','备注33',null,'鄂A12301')");
+		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:49','湖北省武汉市青山区武汉理工大学地点32','备注32',null,'鄂A12302')");
+		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:50','湖北省武汉市青山区武汉理工大学地点33','备注33',null,'鄂A12302')");
 		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:51','湖北省武汉市青山区武汉理工大学地点34','备注34',null,'鄂A12301')");
 		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:52','湖北省武汉市青山区武汉理工大学地点35','备注35',null,'鄂A12301')");
-		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:53','湖北省武汉市青山区武汉理工大学地点36','备注36',null,'鄂A12301')");
-		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:54','湖北省武汉市青山区武汉理工大学地点37','备注37',null,'鄂A12301')");
-		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:55','湖北省武汉市青山区武汉理工大学地点38','备注38',null,'鄂A12301')");
-		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:56','湖北省武汉市青山区武汉理工大学地点39','备注39',null,'鄂A12301')");
-		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:57','湖北省武汉市青山区武汉理工大学地点40','备注40',null,'鄂A12301')");
-		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:58','湖北省武汉市青山区武汉理工大学地点41','备注41',null,'鄂A12301')");
-		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:59','湖北省武汉市青山区武汉理工大学地点42','备注42',null,'鄂A12301')");
-		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:60','湖北省武汉市青山区武汉理工大学地点43','备注43',null,'鄂A12301')");
-		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:61','湖北省武汉市青山区武汉理工大学地点44','备注44',null,'鄂A12301')");
-		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:62','湖北省武汉市青山区武汉理工大学地点45','备注45',null,'鄂A12301')");
-		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:63','湖北省武汉市青山区武汉理工大学地点46','备注46',null,'鄂A12301')");
-		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:64','湖北省武汉市青山区武汉理工大学地点47','备注47',null,'鄂A12301')");
-		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:65','湖北省武汉市青山区武汉理工大学地点48','备注48',null,'鄂A12301')");
-		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:66','湖北省武汉市青山区武汉理工大学地点49','备注49',null,'鄂A12301')");
-		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:67','湖北省武汉市青山区武汉理工大学地点50','备注50',null,'鄂A12301')");
+		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:53','湖北省武汉市青山区武汉理工大学地点36','备注36',null,'鄂A12303')");
+		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:54','湖北省武汉市青山区武汉理工大学地点37','备注37',null,'鄂A12303')");
+		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:55','湖北省武汉市青山区武汉理工大学地点38','备注38','IMG_20120304_142847.jpg','鄂A12304')");
+		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:56','湖北省武汉市青山区武汉理工大学地点39','备注39',null,'鄂A12303')");
+		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:57','湖北省武汉市青山区武汉理工大学地点40','备注40','IMG_20120304_143015.jpg,'鄂A123013')");
+		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:58','湖北省武汉市青山区武汉理工大学地点41','备注41','IMG_20120304_143011.jpg,'鄂A12303')");
+		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:59','湖北省武汉市青山区武汉理工大学地点42','备注42','IMG_20120304_142715.jpg','鄂A12302')");
+		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:60','湖北省武汉市青山区武汉理工大学地点43','备注43','IMG_20120304_142706.jpg','鄂A12302')");
+		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:61','湖北省武汉市青山区武汉理工大学地点44','备注44','IMG_20120220_073225.jpg','鄂A12301')");
+		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:62','湖北省武汉市青山区武汉理工大学地点45','备注45','IMG_20120220_073212.jpg,'鄂A12301')");
+		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:63','湖北省武汉市青山区武汉理工大学地点46','备注46','IMG_20120220_073203.jpg,'鄂A12301')");
+		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:64','湖北省武汉市青山区武汉理工大学地点47','备注47','IMG_20120220_073203.bmp','鄂A12301')");
+		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:65','湖北省武汉市青山区武汉理工大学地点48','备注48','IMG_20120220_073157.jpg','鄂A12301')");
+		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:66','湖北省武汉市青山区武汉理工大学地点49','备注49','IMG_20120220_073148.jpg,'鄂A12301')");
+		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:67','湖北省武汉市青山区武汉理工大学地点50','备注50','IMG_20120220_073139.jpg','鄂A12301')");
 
-		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:18','湖北省武汉市青山区武汉理工大学','未缴纳停车费',null,'鄂A12245')");
-		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–22 16:52:20','湖北省武汉市青山区武汉理工大学海虹五栋',null,null,'鄂A12246')");
-		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–25 16:52:20','湖北省武汉市青山区武汉理工大学海虹四栋',null,null,'鄂A12246')");
+		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–22 16:52:20','湖北省武汉市青山区武汉理工大学海虹五栋','','IMG_20120304_143034.jpg','鄂A12246')");
+		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–25 16:52:20','湖北省武汉市青山区武汉理工大学海虹四栋','违规停放','IMG_20120304_143042.jpg','鄂A12246')");
+		db.execSQL("INSERT INTO Query VALUES(null,'2012–04–20 16:52:18','湖北省武汉市青山区武汉理工大学','未缴纳停车费','2012-05-22_18-49-13.jpg','鄂A12245')");
 	}
 }

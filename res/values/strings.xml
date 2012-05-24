@@ -83,9 +83,13 @@
     <string name="note">备注</string>
     <string name="image">车辆照片</string>
     <string name="touch_to_new">触摸照片拍照</string>
-    <string name="revert">撤消</string>
     <string name="no_cnl">语言包cnl.traineddata不存在！</string>
     <string name="vehicle_query_system">车辆查询系统</string>
     <string name="add_to_vehicle_info_list">增至车辆数据库</string>
-
+    <string name="shake_to_query">摇一摇，快速查询车辆信息</string>
+    <string name="shakeable">摇一摇</string>
+    <string name="saved">已保存</string>
+    <string name="save">保存</string>
+    <string name="revert">撤消更改</string>
+    
 </resources>

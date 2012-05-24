@@ -1,6 +1,6 @@
 package whutcs.viky.viq;
 
-import static whutcs.viky.viq.ViqCommonUtility.*;
+import static whutcs.viky.viq.ViqCommonUtilities.*;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -18,6 +18,7 @@ import android.view.View.OnClickListener;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioButton;
+import android.widget.Toast;
 
 /**
  * Update or create a vehicle info record.
@@ -27,6 +28,8 @@ import android.widget.RadioButton;
  */
 public class VehicleInfoEditActivity extends Activity {
 	private static final String TAG = "VehicleInfoEditActivity";
+
+	// views in the UI:
 
 	private ImageView mImageView;
 
@@ -41,10 +44,16 @@ public class VehicleInfoEditActivity extends Activity {
 	private EditText mDrivingLicenceText;
 	private EditText mNoteText;
 
+	/**
+	 * row id of the current Info record from the calling intent
+	 */
 	private Long mID;
 
-	// Values from the database.
+	// values from the database:
+
+	private String vehicle;
 	private String licence;
+
 	private String type;
 	private String vin;
 	private String name;
@@ -53,7 +62,6 @@ public class VehicleInfoEditActivity extends Activity {
 	private String birth;
 	private String drivingLicence;
 	private String note;
-	private String vehicle;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -85,32 +93,28 @@ public class VehicleInfoEditActivity extends Activity {
 					"_id=?", new String[] { Long.toString(mID) }, null, null,
 					null);
 			Log.v(TAG, "cursor count: " + cursor.getCount());
-			if (cursor.getCount() > 0) {
-				cursor.moveToFirst();
+			cursor.moveToFirst();
 
-				licence = cursor.getString(TABLE_INFO_COLUMN_LICENCE);
-				type = cursor.getString(TABLE_INFO_COLUMN_TYPE);
-				vin = cursor.getString(TABLE_INFO_COLUMN_VIN);
-				name = cursor.getString(TABLE_INFO_COLUMN_NAME);
-				phone = cursor.getString(TABLE_INFO_COLUMN_PHONE);
-				gender = cursor.getString(TABLE_INFO_COLUMN_GENDER);
-				birth = cursor.getString(TABLE_INFO_COLUMN_BIRTH);
-				drivingLicence = cursor
-						.getString(TABLE_INFO_COLUMN_DRIVING_LICENCE);
-				note = cursor.getString(TABLE_INFO_COLUMN_NOTE);
-				vehicle = cursor.getString(TABLE_INFO_COLUMN_PHOTO);
-				setTexts();
-				setImage();
-			}
+			licence = cursor.getString(TABLE_INFO_COLUMN_LICENCE);
+			type = cursor.getString(TABLE_INFO_COLUMN_TYPE);
+			vin = cursor.getString(TABLE_INFO_COLUMN_VIN);
+			name = cursor.getString(TABLE_INFO_COLUMN_NAME);
+			phone = cursor.getString(TABLE_INFO_COLUMN_PHONE);
+			gender = cursor.getString(TABLE_INFO_COLUMN_GENDER);
+			birth = cursor.getString(TABLE_INFO_COLUMN_BIRTH);
+			drivingLicence = cursor
+					.getString(TABLE_INFO_COLUMN_DRIVING_LICENCE);
+			note = cursor.getString(TABLE_INFO_COLUMN_NOTE);
+			vehicle = cursor.getString(TABLE_INFO_COLUMN_PHOTO);
 			cursor.close();
 			database.close();
 			helper.close();
 
 		} else {
-			licence = intent.getStringExtra(EXTRA_LICENCE);
-			Log.v(TAG, "licence: " + licence);
 			vehicle = intent.getStringExtra(EXTRA_VEHICLE);
 			Log.v(TAG, "vehicle: " + vehicle);
+			licence = intent.getStringExtra(EXTRA_LICENCE);
+			Log.v(TAG, "licence: " + licence);
 
 			type = "";
 			vin = "";
@@ -120,10 +124,9 @@ public class VehicleInfoEditActivity extends Activity {
 			birth = "";
 			drivingLicence = "";
 			note = "";
-
-			setTexts();
-			setImage();
 		}
+
+		setViews();
 
 		mImageView.setOnClickListener(new OnImageViewClickListener());
 	}
@@ -131,33 +134,30 @@ public class VehicleInfoEditActivity extends Activity {
 	class OnImageViewClickListener implements OnClickListener {
 
 		public void onClick(View v) {
-
+			// TODO: replace the vehicle image of the Info record
 		}
 
 	}
 
-	/**
-	 * Set the edit texts' text to values from the database.
-	 */
-	private void setTexts() {
+	private void setViews() {
 		mLicenceText.setText(licence);
 		mTypeText.setText(type);
 		mVinText.setText(vin);
 		mNameText.setText(name);
 		mPhoneText.setText(phone);
-		mGenderMaleButton.setChecked(gender.equals(getString(R.string.male)));
-		mGenderFemaleButton.setChecked(gender
-				.equals(getString(R.string.female)));
+		if (gender != null) {
+			boolean genderMale = gender.equals(getString(R.string.male));
+			mGenderMaleButton.setChecked(genderMale);
+			mGenderFemaleButton.setChecked(!genderMale);
+		}
 		mBirthText.setText(birth);
 		mDrivingLicenceText.setText(drivingLicence);
 		mNoteText.setText(note);
-	}
-
-	private void setImage() {
 		Bitmap bitmap = getBitmapByName(vehicle);
 		if (bitmap != null) {
 			mImageView.setImageBitmap(bitmap);
 		}
+
 	}
 
 	@Override
@@ -175,10 +175,11 @@ public class VehicleInfoEditActivity extends Activity {
 		boolean result = super.onOptionsItemSelected(item);
 
 		switch (item.getItemId()) {
-		case R.id.menu_revert:
-			setTexts();
+		case R.id.menu_save:
 			finish();
-			Log.v(TAG, "finished");
+			break;
+		case R.id.menu_revert:
+			setViews();
 			break;
 
 		default:
@@ -236,5 +237,8 @@ public class VehicleInfoEditActivity extends Activity {
 		}
 		database.close();
 		helper.close();
+
+		Toast.makeText(this, getString(R.string.saved), Toast.LENGTH_SHORT)
+				.show();
 	}
 }

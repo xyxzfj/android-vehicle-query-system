@@ -1,10 +1,10 @@
 package whutcs.viky.viq;
 
-import static whutcs.viky.viq.ViqCommonUtility.*;
-import static whutcs.viky.viq.ViqCommonUtility.EXTRA_VEHICLE;
-import static whutcs.viky.viq.ViqCommonUtility.getBitmapByName;
-import static whutcs.viky.viq.ViqCommonUtility.getDataTimeString;
-import static whutcs.viky.viq.ViqCommonUtility.getGpsString;
+import static whutcs.viky.viq.ViqCommonUtilities.*;
+import static whutcs.viky.viq.ViqCommonUtilities.EXTRA_VEHICLE;
+import static whutcs.viky.viq.ViqCommonUtilities.getBitmapByName;
+import static whutcs.viky.viq.ViqCommonUtilities.getDataTimeString;
+import static whutcs.viky.viq.ViqCommonUtilities.getGpsString;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.SPECIAL_COLUMN_LICENCE;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMNS;
@@ -52,9 +52,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 /**
- * Query the database with the given mLicence number and show its vehicle's and
- * owner's basic information and its historical queries. If none, redirect to
- * VehicleInfoEditActivity to create one.
+ * Query the database with the given row id of a vehicle Info record or licence
+ * number, show the vehicle's and owner's basic information and historical
+ * queries.
  * 
  * @author xyxzfj@gmail.com
  * 
@@ -62,10 +62,10 @@ import android.widget.Toast;
 public class VehicleItemViewActivity extends ViqShakeableListActicity {
 	private static final String TAG = "VehicleItemViewActivity";
 
-	private String mLicence;
-	private String mVehicle;
-
+	// these fields are from the calling intent
 	private Long mId;
+	private String mLicence;
+
 	// private String licence;
 	private String type;
 	private String vin;
@@ -77,34 +77,28 @@ public class VehicleItemViewActivity extends ViqShakeableListActicity {
 	private String note;
 	private String vehicle;
 
-	private boolean mIsNewVehicleInfo;
-
-	private MenuItem mAddToVehicleInfoListMenuItem;
-
 	private ViqSQLiteOpenHelper mHelper;
 
 	private AdapterContextMenuInfo mContextMenuInfo;
+
+	private MenuItem mAddToVehicleInfoListMenuItem;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
 		Intent intent = getIntent();
+		mId = intent.getLongExtra(EXTRA_ID, 0L);
 		mLicence = intent.getStringExtra(EXTRA_LICENCE);
-		mVehicle = intent.getStringExtra(EXTRA_VEHICLE);
-		Log.v(TAG, "mLicence:" + mLicence);
-		Log.v(TAG, "mVehicle: " + mVehicle);
+		Log.v(TAG, "mId: " + mId);
+		Log.v(TAG, "mLicence: " + mLicence);
 
-		if (mLicence == null) {
+		if (mId == null && mLicence == null) {
 			finish();
 			return;
 		}
 
 		setContentView(R.layout.vehicle_item_view);
-
-		if (mVehicle != null) {
-			createQueryRecord();
-		}
 
 		mHelper = new ViqSQLiteOpenHelper(this);
 
@@ -129,25 +123,6 @@ public class VehicleItemViewActivity extends ViqShakeableListActicity {
 		Cursor cursor = adapter.getCursor();
 		cursor.close();
 		mHelper.close();
-	}
-
-	private void createQueryRecord() {
-		String datetime = getDataTimeString();
-		String gps = getGpsString(this);
-
-		ContentValues values = new ContentValues();
-		values.put(TABLE_QUERY_COLUMNS[TABLE_QUERY_COLUMN_TIME], datetime);
-		values.put(TABLE_QUERY_COLUMNS[TABLE_QUERY_COLUMN_PLACE], gps);
-		values.put(TABLE_QUERY_COLUMNS[TABLE_QUERY_COLUMN_NOTE], note);
-		values.put(TABLE_QUERY_COLUMNS[TABLE_QUERY_COLUMN_PHOTO], vehicle);
-		values.put(SPECIAL_COLUMN_LICENCE, mLicence);
-
-		ViqSQLiteOpenHelper helper = new ViqSQLiteOpenHelper(this);
-		SQLiteDatabase database = helper.getWritableDatabase();
-		long rowid = database.insert(TABLE_QUERY, null, values);
-		Log.v(TAG, "rowid: " + rowid);
-		database.close();
-		helper.close();
 	}
 
 	@Override
@@ -189,7 +164,7 @@ public class VehicleItemViewActivity extends ViqShakeableListActicity {
 		switch (item.getItemId()) {
 		case R.id.menu_edit:
 			startActivity(new Intent(this, VehicleQueryEditActivity.class)
-					.putExtra("mId", id));
+					.putExtra("_id", id));
 			break;
 		case R.id.menu_delete:
 			deleteQuery(id, time);
@@ -218,13 +193,23 @@ public class VehicleItemViewActivity extends ViqShakeableListActicity {
 	}
 
 	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		boolean result = super.onPrepareOptionsMenu(menu);
+		Log.v(TAG, "onPrepareOptionsMenu");
+
+		// if this vehicle is not in the database, add menu
+		// mAddToVehicleInfoListMenuItem
+		mAddToVehicleInfoListMenuItem.setVisible(mId == 0);
+		return result;
+	}
+
+	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		boolean result = super.onCreateOptionsMenu(menu);
+		Log.v(TAG, "onCreateOptionsMenu");
 
-		if (mIsNewVehicleInfo) {
-			mAddToVehicleInfoListMenuItem = menu
-					.add(R.string.add_to_vehicle_info_list);
-		}
+		mAddToVehicleInfoListMenuItem = menu
+				.add(R.string.add_to_vehicle_info_list);
 
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.vehicle_item_view_options_menu, menu);
@@ -243,8 +228,7 @@ public class VehicleItemViewActivity extends ViqShakeableListActicity {
 
 		if (item == mAddToVehicleInfoListMenuItem) {
 			startActivity(new Intent(this, VehicleInfoEditActivity.class)
-					.putExtra(EXTRA_LICENCE, mLicence).putExtra(EXTRA_VEHICLE,
-							mVehicle));
+					.putExtra(EXTRA_LICENCE, mLicence));
 			return result;
 		}
 
@@ -338,14 +322,22 @@ public class VehicleItemViewActivity extends ViqShakeableListActicity {
 				}).setNegativeButton(R.string.cancel, null).show();
 	}
 
-	protected void refreshItemView() {
+	private void refreshItemView() {
 		SQLiteDatabase database = mHelper.getReadableDatabase();
 
-		Cursor infoCursor = database.query(TABLE_INFO, TABLE_INFO_COLUMNS,
-				"licence=?", new String[] { mLicence }, null, null, null);
+		Cursor infoCursor;
+		if (mId != 0) {
+			infoCursor = database.query(TABLE_INFO, TABLE_INFO_COLUMNS,
+					"_id=?", new String[] { Long.toString(mId) }, null, null,
+					null);
+		} else {
+			infoCursor = database.query(TABLE_INFO, TABLE_INFO_COLUMNS,
+					"licence=?", new String[] { mLicence }, null, null, null);
+		}
 		if (infoCursor.getCount() > 0) {
 			infoCursor.moveToFirst();
 			mId = infoCursor.getLong(0);
+			mLicence = infoCursor.getString(TABLE_INFO_COLUMN_LICENCE);
 			type = infoCursor.getString(TABLE_INFO_COLUMN_TYPE);
 			vin = infoCursor.getString(TABLE_INFO_COLUMN_VIN);
 			name = infoCursor.getString(TABLE_INFO_COLUMN_NAME);
@@ -371,20 +363,16 @@ public class VehicleItemViewActivity extends ViqShakeableListActicity {
 			if (bitmap != null) {
 				((ImageView) findViewById(R.id.vehicle)).setImageBitmap(bitmap);
 			}
-			mIsNewVehicleInfo = false;
-		} else {
-			mIsNewVehicleInfo = true;
 		}
-
-		database.close();
 		infoCursor.close();
+		database.close();
 	}
 
 	/**
 	 * Load or Reload the list view with the latest filtered data from the
 	 * database. Update mMatchesView by the way.
 	 */
-	protected void refreshListView() {
+	private void refreshListView() {
 		// Should never be closed explicitly until onDestroy().
 		Cursor cursor;
 
@@ -408,13 +396,25 @@ public class VehicleItemViewActivity extends ViqShakeableListActicity {
 						final String imageName = cursor.getString(columnIndex);
 						if (imageName != null) {
 							// set image in new thread
-							ViqImageFetchCacher fetchCacher = new ViqImageFetchCacher(
+							ViqCachedImageFetcher fetchCacher = new ViqCachedImageFetcher(
 									imageName, imageView);
 							fetchCacher.run();
 							result = true;
 						} else {
 							imageView.setImageResource(R.drawable.vehicle);
 						}
+					} else if (columnIndex == TABLE_QUERY_COLUMN_TIME) {
+						TextView textView = (TextView) view;
+						String relativeTime = null;
+						String time = cursor.getString(columnIndex);
+						if (time != null) {
+							relativeTime = getRelativeTime(
+									VehicleItemViewActivity.this, time);
+						}
+						if (relativeTime == null) {
+							relativeTime = time;
+						}
+						textView.setText(relativeTime);
 					}
 					return result;
 				}

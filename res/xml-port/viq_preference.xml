@@ -8,6 +8,12 @@
             android:key="@string/query_method"
             android:summary="@string/query_method_summary"
             android:title="@string/query_method" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="@string/shakeable"
+            android:summary="@string/shake_to_query"
+            android:title="@string/shakeable" />
     </PreferenceCategory>
 
 </PreferenceScreen>

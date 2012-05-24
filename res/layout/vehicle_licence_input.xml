@@ -6,12 +6,11 @@
 
     <ImageView
         android:id="@+id/extracted_licence"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="100dp"
         android:layout_gravity="center"
         android:contentDescription="@string/extracted_licence_image"
-        android:maxHeight="100dp"
-        android:src="@drawable/extracted_licence" />
+        android:maxHeight="100dp" />
 
     <TableLayout
         android:id="@+id/table"

@@ -20,4 +20,9 @@ public class ViqPreferenceActivity extends PreferenceActivity {
 						context.getString(R.string.take_licence_image));
 	}
 
+	public static boolean isQuickQueryEnabled(Context context) {
+		return PreferenceManager.getDefaultSharedPreferences(context)
+				.getBoolean(context.getString(R.string.shakeable), true);
+	}
+
 }

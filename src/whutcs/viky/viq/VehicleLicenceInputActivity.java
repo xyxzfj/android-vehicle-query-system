@@ -37,14 +37,23 @@ import static com.googlecode.javacv.cpp.opencv_imgproc.cvMinAreaRect2;
 import static com.googlecode.javacv.cpp.opencv_imgproc.cvSmooth;
 import static com.googlecode.javacv.cpp.opencv_imgproc.cvThreshold;
 import static com.googlecode.javacv.cpp.opencv_imgproc.cvWarpAffine;
-import static whutcs.viky.viq.ViqCommonUtility.EXTRA_LICENCE;
-import static whutcs.viky.viq.ViqCommonUtility.EXTRA_VEHICLE;
-import static whutcs.viky.viq.ViqCommonUtility.fileCopy;
-import static whutcs.viky.viq.ViqCommonUtility.getBitmap;
-import static whutcs.viky.viq.ViqCommonUtility.getDcimDirectory;
-import static whutcs.viky.viq.ViqCommonUtility.getNewImageFile;
-import static whutcs.viky.viq.ViqCommonUtility.streamCopy;
-import static whutcs.viky.viq.ViqCommonUtility.uriToImagePath;
+import static whutcs.viky.viq.ViqCommonUtilities.EXTRA_LICENCE;
+import static whutcs.viky.viq.ViqCommonUtilities.EXTRA_VEHICLE;
+import static whutcs.viky.viq.ViqCommonUtilities.fileCopy;
+import static whutcs.viky.viq.ViqCommonUtilities.getBitmap;
+import static whutcs.viky.viq.ViqCommonUtilities.getDataTimeString;
+import static whutcs.viky.viq.ViqCommonUtilities.getDcimDirectory;
+import static whutcs.viky.viq.ViqCommonUtilities.getGpsString;
+import static whutcs.viky.viq.ViqCommonUtilities.getNewImageFile;
+import static whutcs.viky.viq.ViqCommonUtilities.streamCopy;
+import static whutcs.viky.viq.ViqCommonUtilities.uriToImagePath;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.SPECIAL_COLUMN_LICENCE;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY_COLUMNS;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY_COLUMN_NOTE;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY_COLUMN_PHOTO;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY_COLUMN_PLACE;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY_COLUMN_TIME;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -54,8 +63,10 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 
 import android.app.Activity;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
@@ -114,10 +125,6 @@ public class VehicleLicenceInputActivity extends Activity {
 	 * The file of the vehicle image taken or selected.
 	 */
 	private File mVehicleImageFile;
-	/**
-	 * The uri of the vehicle image taken or selected.
-	 */
-	private Uri mVehicleImageUri;
 
 	/**
 	 * The bitmap of the licence plate image.
@@ -203,7 +210,7 @@ public class VehicleLicenceInputActivity extends Activity {
 		}
 	}
 
-	class OnOkClickListener implements OnClickListener {
+	private class OnOkClickListener implements OnClickListener {
 
 		/**
 		 * Create a new query by calling VehicleItemViewActivity with the input
@@ -219,13 +226,41 @@ public class VehicleLicenceInputActivity extends Activity {
 			Intent itemShowIntent = new Intent(
 					VehicleLicenceInputActivity.this,
 					VehicleItemViewActivity.class);
+			String vehicle = null;
+			if (mVehicleImageFile != null) {
+				vehicle = mVehicleImageFile.getName();
+			}
+
+			createQueryRecord(licence, vehicle);
+
 			itemShowIntent.putExtra(EXTRA_LICENCE, licence).putExtra(
-					EXTRA_VEHICLE, mVehicleImageFile.getName());
+					EXTRA_VEHICLE, vehicle);
 			startActivity(itemShowIntent);
+
+			finish();
 		}
 	}
 
-	class OnCancelClickListener implements OnClickListener {
+	private void createQueryRecord(String licence, String vehicle) {
+		String datetime = getDataTimeString();
+		String gps = getGpsString(this);
+
+		ContentValues values = new ContentValues();
+		values.put(TABLE_QUERY_COLUMNS[TABLE_QUERY_COLUMN_TIME], datetime);
+		values.put(TABLE_QUERY_COLUMNS[TABLE_QUERY_COLUMN_PLACE], gps);
+		values.put(TABLE_QUERY_COLUMNS[TABLE_QUERY_COLUMN_NOTE], "");
+		values.put(TABLE_QUERY_COLUMNS[TABLE_QUERY_COLUMN_PHOTO], vehicle);
+		values.put(SPECIAL_COLUMN_LICENCE, licence);
+
+		ViqSQLiteOpenHelper helper = new ViqSQLiteOpenHelper(this);
+		SQLiteDatabase database = helper.getWritableDatabase();
+		long rowid = database.insert(TABLE_QUERY, null, values);
+		Log.v(TAG, "rowid: " + rowid);
+		database.close();
+		helper.close();
+	}
+
+	private class OnCancelClickListener implements OnClickListener {
 
 		public void onClick(View v) {
 			finish();
@@ -240,10 +275,10 @@ public class VehicleLicenceInputActivity extends Activity {
 		mVehicleImageFile = getNewImageFile();
 		Intent takeVehicleImageIntent = new Intent(
 				MediaStore.ACTION_IMAGE_CAPTURE);
-		mVehicleImageUri = Uri.fromFile(mVehicleImageFile);
-		Log.v(TAG, "Taken image uri: " + mVehicleImageUri.toString());
+		Uri vehicleImageUri = Uri.fromFile(mVehicleImageFile);
+		Log.v(TAG, "Taken image uri: " + vehicleImageUri.toString());
 		takeVehicleImageIntent.putExtra(MediaStore.EXTRA_OUTPUT,
-				mVehicleImageUri);
+				vehicleImageUri);
 		startActivityForResult(takeVehicleImageIntent, CODE_TAKE_PHOTO);
 	}
 
@@ -265,9 +300,9 @@ public class VehicleLicenceInputActivity extends Activity {
 			case CODE_TAKE_PHOTO:
 				break;
 			case CODE_SELECT_PHOTO:
-				mVehicleImageUri = data.getData();
-				Log.v(TAG, "Selected image uri: " + mVehicleImageUri.toString());
-				String selectImageName = uriToImagePath(this, mVehicleImageUri);
+				Uri vehicleImageUri = data.getData();
+				Log.v(TAG, "Selected image uri: " + vehicleImageUri.toString());
+				String selectImageName = uriToImagePath(this, vehicleImageUri);
 				File srcFile = new File(selectImageName);
 				mVehicleImageFile = getNewImageFile();
 				// Copy the selected image file to the DIRECTORY_VIQ.
@@ -387,12 +422,14 @@ public class VehicleLicenceInputActivity extends Activity {
 	private static ArrayList<Character> getAlikeChars(char c) {
 		ArrayList<Character> alikeChars = new ArrayList<Character>();
 
-		final int CHARS = 3;
+		final int CHARS = 5;
 		final char likeChars[][] = new char[CHARS][];
 
-		likeChars[0] = new char[] { 'F', 'P' };
-		likeChars[1] = new char[] { '1', 'I' };
-		likeChars[2] = new char[] { '0', 'O' };
+		likeChars[0] = new char[] { 'B', '8' };
+		likeChars[1] = new char[] { 'C', 'D', 'G', 'O', 'Q', '0' };
+		likeChars[2] = new char[] { 'E', 'F', 'P', 'T', '7' };
+		likeChars[3] = new char[] { 'I', 'L', '1' };
+		likeChars[4] = new char[] { '¶õ', 'Ô¥', '¸Ó' };
 
 		int row = 0;
 		int col = 0;
@@ -705,7 +742,7 @@ public class VehicleLicenceInputActivity extends Activity {
 		return plateImage;
 	}
 
-	class ResultEditText extends EditText {
+	private class ResultEditText extends EditText {
 		private final EditText mEditText = this;
 		private static final int MAXLEN = 1;
 
@@ -763,7 +800,7 @@ public class VehicleLicenceInputActivity extends Activity {
 		}
 	}
 
-	class CandidateButton extends Button {
+	private class CandidateButton extends Button {
 
 		public CandidateButton(Context context, final int row, final int col) {
 			super(context);
