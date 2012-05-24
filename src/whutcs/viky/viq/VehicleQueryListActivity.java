@@ -3,9 +3,18 @@
  */
 package whutcs.viky.viq;
 
-import static whutcs.viky.viq.ViqCommonUtility.*;
-import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO;
-import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_LICENCE;
+import static whutcs.viky.viq.ViqCommonUtility.EXTRA_LICENCE;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.VIEW_QUERY_INFO;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.VIEW_QUERY_INFO_COLUMNS;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.VIEW_QUERY_INFO_COLUMN_LICENCE;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.VIEW_QUERY_INFO_COLUMN_NAME;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.VIEW_QUERY_INFO_COLUMN_NOTE;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.VIEW_QUERY_INFO_COLUMN_PHONE;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.VIEW_QUERY_INFO_COLUMN_PHOTO;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.VIEW_QUERY_INFO_COLUMN_PLACE;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.VIEW_QUERY_INFO_COLUMN_TIME;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.VIEW_QUERY_INFO_SELECTION;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -19,8 +28,9 @@ import android.view.ContextMenu.ContextMenuInfo;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ListView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.ListView;
+import android.widget.Toast;
 
 /**
  * Show a list of historical queries, including the vehicle image taken or
@@ -53,17 +63,12 @@ public class VehicleQueryListActivity extends ViqBaseShakeableListActivity {
 	@Override
 	protected void setTo() {
 		setTo(new int[] { R.id.rowid, R.id.licence, R.id.name, R.id.phone,
-				R.id.time, R.id.place, R.id.note, R.drawable.vehicle });
+				R.id.time, R.id.place, R.id.note, R.id.vehicle });
 	}
 
 	@Override
 	protected void setSelection() {
 		setSelection(VIEW_QUERY_INFO_SELECTION);
-	}
-
-	@Override
-	protected void setSelectionArgs() {
-		setSelectionArgs(getViewQueryInfoSelectionArgs(getFilter()));
 	}
 
 	@Override
@@ -74,6 +79,11 @@ public class VehicleQueryListActivity extends ViqBaseShakeableListActivity {
 	@Override
 	protected void setColumnPhoto() {
 		setColumnPhoto(VIEW_QUERY_INFO_COLUMN_PHOTO);
+	}
+
+	@Override
+	protected void setColumnTime() {
+		setColumnTime(VIEW_QUERY_INFO_COLUMN_TIME);
 	}
 
 	@Override
@@ -147,8 +157,13 @@ public class VehicleQueryListActivity extends ViqBaseShakeableListActivity {
 			deleteItem(id, licence);
 			break;
 		case R.id.menu_call_owner:
-			startActivity(new Intent(Intent.ACTION_CALL).setData(Uri
-					.parse("tel:" + phone)));
+			if (phone == null || phone.length() == 0) {
+				Toast.makeText(this, getString(R.string.no_phone_found),
+						Toast.LENGTH_SHORT).show();
+			} else {
+				startActivity(new Intent(Intent.ACTION_CALL).setData(Uri
+						.parse("tel:" + phone)));
+			}
 			break;
 
 		// Sub menu items of menu item menu_copy:
@@ -173,7 +188,7 @@ public class VehicleQueryListActivity extends ViqBaseShakeableListActivity {
 		case R.id.menu_copy_all:
 			clipboard.setText(all);
 			break;
-		case R.id.menu_sms_vehicle_query:
+		case R.id.menu_sms_all:
 			startActivity(new Intent(Intent.ACTION_SENDTO, Uri.parse("smsto:"))
 					.putExtra("sms_body", all));
 			break;

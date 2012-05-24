@@ -1,8 +1,5 @@
 package whutcs.viky.viq;
 
-import static whutcs.viky.viq.ViqCommonUtility.*;
-
-// Search methods or constants at http://code.google.com/p/javacv/source/search?q=&origq=&btnG=Search+Trunk to get their full package path.
 import static com.googlecode.javacv.cpp.opencv_core.CV_32FC1;
 import static com.googlecode.javacv.cpp.opencv_core.CV_RGB;
 import static com.googlecode.javacv.cpp.opencv_core.CV_WHOLE_SEQ;
@@ -40,12 +37,14 @@ import static com.googlecode.javacv.cpp.opencv_imgproc.cvMinAreaRect2;
 import static com.googlecode.javacv.cpp.opencv_imgproc.cvSmooth;
 import static com.googlecode.javacv.cpp.opencv_imgproc.cvThreshold;
 import static com.googlecode.javacv.cpp.opencv_imgproc.cvWarpAffine;
+import static whutcs.viky.viq.ViqCommonUtility.EXTRA_LICENCE;
+import static whutcs.viky.viq.ViqCommonUtility.EXTRA_VEHICLE;
 import static whutcs.viky.viq.ViqCommonUtility.fileCopy;
+import static whutcs.viky.viq.ViqCommonUtility.getBitmap;
 import static whutcs.viky.viq.ViqCommonUtility.getDcimDirectory;
-import static whutcs.viky.viq.ViqCommonUtility.getLoacalBitmap;
 import static whutcs.viky.viq.ViqCommonUtility.getNewImageFile;
 import static whutcs.viky.viq.ViqCommonUtility.streamCopy;
-import static whutcs.viky.viq.ViqCommonUtility.uriToImageName;
+import static whutcs.viky.viq.ViqCommonUtility.uriToImagePath;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -268,7 +267,7 @@ public class VehicleLicenceInputActivity extends Activity {
 			case CODE_SELECT_PHOTO:
 				mVehicleImageUri = data.getData();
 				Log.v(TAG, "Selected image uri: " + mVehicleImageUri.toString());
-				String selectImageName = uriToImageName(this, mVehicleImageUri);
+				String selectImageName = uriToImagePath(this, mVehicleImageUri);
 				File srcFile = new File(selectImageName);
 				mVehicleImageFile = getNewImageFile();
 				// Copy the selected image file to the DIRECTORY_VIQ.
@@ -334,7 +333,7 @@ public class VehicleLicenceInputActivity extends Activity {
 		// Show the extracted licence image.
 		ImageView extractedLicenceImageView = (ImageView) findViewById(R.id.extracted_licence);
 		extractedLicenceImageView
-				.setImageBitmap(mPlateBitmap == null ? getLoacalBitmap(mVehicleImageFile
+				.setImageBitmap(mPlateBitmap == null ? getBitmap(mVehicleImageFile
 						.getPath()) : mPlateBitmap);
 
 		// Show the recognized licence number.
@@ -362,7 +361,7 @@ public class VehicleLicenceInputActivity extends Activity {
 		if (plateImage != null) {
 			mPlateBitmap = iplImageToBitmap(plateImage);
 		} else {
-			mPlateBitmap = getLoacalBitmap(vehicleImagePath);
+			mPlateBitmap = getBitmap(vehicleImagePath);
 		}
 		plateNumber = recognizePlate(mPlateBitmap);
 

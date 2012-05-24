@@ -1,7 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android" ><item android:id="@+id/menu_edit" android:title="@string/edit"></item>
-    <item android:id="@+id/menu_delete" android:title="@string/delete"></item>
-    
-    
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
+    <item
+        android:id="@+id/menu_edit"
+        android:title="@string/edit">
+    </item>
+    <item
+        android:id="@+id/menu_delete"
+        android:title="@string/delete">
+    </item>
+    <item
+        android:id="@+id/menu_sms_all"
+        android:title="@string/sms_all">
+    </item>
+    <item
+        android:id="@+id/menu_copy"
+        android:title="@string/copy">
+        <menu>
+            <item
+                android:id="@+id/menu_copy_time"
+                android:title="@string/copy_time">
+            </item>
+            <item
+                android:id="@+id/menu_copy_place"
+                android:title="@string/copy_place">
+            </item>
+            <item
+                android:id="@+id/menu_copy_note"
+                android:title="@string/copy_note">
+            </item>
+            <item
+                android:id="@+id/menu_copy_all"
+                android:title="@string/copy_all">
+            </item>
+        </menu>
+    </item>
+    
 </menu>

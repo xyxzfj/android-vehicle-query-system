@@ -18,8 +18,8 @@
         android:title="@string/call_owner">
     </item>
     <item
-        android:id="@+id/menu_sms_vehicle_query"
-        android:title="@string/sms_vehicle_query">
+        android:id="@+id/menu_sms_all"
+        android:title="@string/sms_all">
     </item>
     <item
         android:id="@+id/menu_copy"

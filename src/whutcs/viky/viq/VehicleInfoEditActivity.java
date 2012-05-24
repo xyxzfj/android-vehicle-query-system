@@ -60,7 +60,7 @@ public class VehicleInfoEditActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.vehicle_info_edit);
 
-		mImageView = (ImageView) findViewById(R.id.vehicle_image);
+		mImageView = (ImageView) findViewById(R.id.vehicle);
 
 		mLicenceText = (EditText) findViewById(R.id.licence);
 		mTypeText = (EditText) findViewById(R.id.type);
@@ -154,8 +154,10 @@ public class VehicleInfoEditActivity extends Activity {
 	}
 
 	private void setImage() {
-		Bitmap bitmap = getLoacalBitmapByName(vehicle);
-		mImageView.setImageBitmap(bitmap);
+		Bitmap bitmap = getBitmapByName(vehicle);
+		if (bitmap != null) {
+			mImageView.setImageBitmap(bitmap);
+		}
 	}
 
 	@Override

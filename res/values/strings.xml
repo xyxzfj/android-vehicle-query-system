@@ -63,7 +63,7 @@
     <string name="send_vehicle_info">短信发送车辆信息</string>
     <string name="copy_time">复制查询时间</string>
     <string name="copy_place">复制查询地点</string>
-    <string name="sms_vehicle_query">短信发送查询记录</string>
+    <string name="sms_all">短信发送全部</string>
     <string name="copy">复制</string>
     <string name="copy_owner_gender_birth">复制车主姓别、出生年月</string>
     <string name="item_view">查看车辆</string>

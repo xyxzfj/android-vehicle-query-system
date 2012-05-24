@@ -34,7 +34,7 @@
             </LinearLayout>
 
             <ImageView
-                android:id="@+id/vehicle_image"
+                android:id="@+id/vehicle"
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:layout_gravity="center_horizontal"

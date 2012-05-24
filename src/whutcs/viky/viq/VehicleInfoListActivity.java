@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ListView;
+import android.widget.Toast;
 
 /**
  * Show a list of all vehicles' information, the basic information of the
@@ -28,6 +29,7 @@ import android.widget.ListView;
  */
 public class VehicleInfoListActivity extends ViqBaseShakeableListActivity {
 	private static final String TAG = "VehicleInfoListActivity";
+
 	private AdapterContextMenuInfo mContextMenuInfo;
 
 	@Override
@@ -58,11 +60,6 @@ public class VehicleInfoListActivity extends ViqBaseShakeableListActivity {
 	}
 
 	@Override
-	protected void setSelectionArgs() {
-		setSelectionArgs(getTableInfoSelectionArgs(getFilter()));
-	}
-
-	@Override
 	protected void setOrderBy() {
 		setOrderBy(TABLE_INFO_COLUMNS[TABLE_INFO_COLUMN_LICENCE]);
 	}
@@ -70,6 +67,11 @@ public class VehicleInfoListActivity extends ViqBaseShakeableListActivity {
 	@Override
 	protected void setColumnPhoto() {
 		setColumnPhoto(TABLE_INFO_COLUMN_PHOTO);
+	}
+
+	@Override
+	protected void setColumnTime() {
+		setColumnTime(-1);
 	}
 
 	@Override
@@ -156,10 +158,15 @@ public class VehicleInfoListActivity extends ViqBaseShakeableListActivity {
 			deleteItem(id, licence);
 			break;
 		case R.id.menu_call_owner:
-			startActivity(new Intent(Intent.ACTION_CALL).setData(Uri
-					.parse("tel:" + phone)));
+			if (phone == null || phone.length() == 0) {
+				Toast.makeText(this, getString(R.string.no_phone_found),
+						Toast.LENGTH_SHORT).show();
+			} else {
+				startActivity(new Intent(Intent.ACTION_CALL).setData(Uri
+						.parse("tel:" + phone)));
+			}
 			break;
-		case R.id.menu_sms_vehicle_info:
+		case R.id.menu_sms_all:
 			startActivity(new Intent(Intent.ACTION_SENDTO, Uri.parse("smsto:"))
 					.putExtra("sms_body", all));
 			break;

@@ -32,18 +32,6 @@
                     android:text="@string/smp_time"
                     android:textAppearance="?android:attr/textAppearanceSmall" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/comma"
-                    android:textAppearance="?android:attr/textAppearanceSmall" />
-
-                <TextView
-                    android:id="@+id/relative_time"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/smp_relative_time"
-                    android:textAppearance="?android:attr/textAppearanceSmall" />
             </LinearLayout>
 
             <TextView

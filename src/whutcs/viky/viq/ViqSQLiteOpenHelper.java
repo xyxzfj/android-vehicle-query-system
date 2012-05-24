@@ -55,10 +55,6 @@ public class ViqSQLiteOpenHelper extends SQLiteOpenHelper {
 	public static final int TABLE_INFO_COLUMN_PHOTO = 10;
 	public static final String TABLE_INFO_SELECTION = getSelection(TABLE_INFO_COLUMNS);
 
-	public static final String[] getTableInfoSelectionArgs(String filter) {
-		return getSelectiionArgs(filter, TABLE_INFO_COLUMNS);
-	}
-
 	// VIEW QUERY_INFO:
 	// The columns of view QueryInfo and their index.
 	public static final String[] VIEW_QUERY_INFO_COLUMNS = new String[] {
@@ -71,10 +67,6 @@ public class ViqSQLiteOpenHelper extends SQLiteOpenHelper {
 	public static final int VIEW_QUERY_INFO_COLUMN_NOTE = 6;
 	public static final int VIEW_QUERY_INFO_COLUMN_PHOTO = 7;
 	public static final String VIEW_QUERY_INFO_SELECTION = getSelection(VIEW_QUERY_INFO_COLUMNS);
-
-	public static final String[] getViewQueryInfoSelectionArgs(String filter) {
-		return getSelectiionArgs(filter, VIEW_QUERY_INFO_COLUMNS);
-	}
 
 	// Creation sql of tables and views.
 	/**
@@ -144,9 +136,9 @@ public class ViqSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * Get the corresponding selectionArgs with getSelection().
 	 * 
 	 * @param filter
-	 * @return
+	 * @return selectionArgs
 	 */
-	private static String[] getSelectiionArgs(String filter,
+	public static String[] getSelectiionArgs(String filter,
 			String[] columnsWithIDFirst) {
 		String[] selectionArgs = new String[columnsWithIDFirst.length - 1];
 		for (int i = 0; i < selectionArgs.length; i++) {
