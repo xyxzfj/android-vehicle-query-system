@@ -21,18 +21,15 @@ import android.widget.RadioButton;
 import android.widget.Toast;
 
 /**
- * Update or create a vehicle info record.
+ * Update or create a mVehicle info record.
  * 
- * @author Administrator
+ * @author xyxzfj@gmail.com
  * 
  */
 public class VehicleInfoEditActivity extends Activity {
 	private static final String TAG = "VehicleInfoEditActivity";
 
-	// views in the UI:
-
 	private ImageView mImageView;
-
 	private EditText mLicenceText;
 	private EditText mTypeText;
 	private EditText mVinText;
@@ -44,24 +41,18 @@ public class VehicleInfoEditActivity extends Activity {
 	private EditText mDrivingLicenceText;
 	private EditText mNoteText;
 
-	/**
-	 * row id of the current Info record from the calling intent
-	 */
 	private Long mID;
 
-	// values from the database:
-
-	private String vehicle;
-	private String licence;
-
-	private String type;
-	private String vin;
-	private String name;
-	private String phone;
-	private String gender;
-	private String birth;
-	private String drivingLicence;
-	private String note;
+	private String mVehicle;
+	private String mLicence;
+	private String mType;
+	private String mVin;
+	private String mName;
+	private String mPhone;
+	private String mGender;
+	private String mBirth;
+	private String mDrivingLicence;
+	private String mNote;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -69,7 +60,6 @@ public class VehicleInfoEditActivity extends Activity {
 		setContentView(R.layout.vehicle_info_edit);
 
 		mImageView = (ImageView) findViewById(R.id.vehicle);
-
 		mLicenceText = (EditText) findViewById(R.id.licence);
 		mTypeText = (EditText) findViewById(R.id.type);
 		mVinText = (EditText) findViewById(R.id.vin);
@@ -83,7 +73,7 @@ public class VehicleInfoEditActivity extends Activity {
 		mNoteText = (EditText) findViewById(R.id.note);
 
 		Intent intent = getIntent();
-		mID = intent.getLongExtra("_id", 0);
+		mID = intent.getLongExtra(EXTRA_ID, 0);
 		Log.v(TAG, "_id got:" + mID);
 
 		if (mID != 0) {
@@ -93,37 +83,37 @@ public class VehicleInfoEditActivity extends Activity {
 					"_id=?", new String[] { Long.toString(mID) }, null, null,
 					null);
 			Log.v(TAG, "cursor count: " + cursor.getCount());
-			cursor.moveToFirst();
-
-			licence = cursor.getString(TABLE_INFO_COLUMN_LICENCE);
-			type = cursor.getString(TABLE_INFO_COLUMN_TYPE);
-			vin = cursor.getString(TABLE_INFO_COLUMN_VIN);
-			name = cursor.getString(TABLE_INFO_COLUMN_NAME);
-			phone = cursor.getString(TABLE_INFO_COLUMN_PHONE);
-			gender = cursor.getString(TABLE_INFO_COLUMN_GENDER);
-			birth = cursor.getString(TABLE_INFO_COLUMN_BIRTH);
-			drivingLicence = cursor
-					.getString(TABLE_INFO_COLUMN_DRIVING_LICENCE);
-			note = cursor.getString(TABLE_INFO_COLUMN_NOTE);
-			vehicle = cursor.getString(TABLE_INFO_COLUMN_PHOTO);
+			if (cursor.getCount() > 0) {
+				cursor.moveToFirst();
+				mVehicle = cursor.getString(TABLE_INFO_COLUMN_PHOTO);
+				mLicence = cursor.getString(TABLE_INFO_COLUMN_LICENCE);
+				mType = cursor.getString(TABLE_INFO_COLUMN_TYPE);
+				mVin = cursor.getString(TABLE_INFO_COLUMN_VIN);
+				mName = cursor.getString(TABLE_INFO_COLUMN_NAME);
+				mPhone = cursor.getString(TABLE_INFO_COLUMN_PHONE);
+				mGender = cursor.getString(TABLE_INFO_COLUMN_GENDER);
+				mBirth = cursor.getString(TABLE_INFO_COLUMN_BIRTH);
+				mDrivingLicence = cursor
+						.getString(TABLE_INFO_COLUMN_DRIVING_LICENCE);
+				mNote = cursor.getString(TABLE_INFO_COLUMN_NOTE);
+			}
 			cursor.close();
 			database.close();
 			helper.close();
 
 		} else {
-			vehicle = intent.getStringExtra(EXTRA_VEHICLE);
-			Log.v(TAG, "vehicle: " + vehicle);
-			licence = intent.getStringExtra(EXTRA_LICENCE);
-			Log.v(TAG, "licence: " + licence);
-
-			type = "";
-			vin = "";
-			name = "";
-			phone = "";
-			gender = "";
-			birth = "";
-			drivingLicence = "";
-			note = "";
+			mVehicle = intent.getStringExtra(EXTRA_VEHICLE);
+			Log.v(TAG, "mVehicle: " + mVehicle);
+			mLicence = intent.getStringExtra(EXTRA_LICENCE);
+			Log.v(TAG, "mLicence: " + mLicence);
+			mType = null;
+			mVehicle = null;
+			mName = null;
+			mPhone = null;
+			mGender = null;
+			mBirth = null;
+			mDrivingLicence = null;
+			mNote = null;
 		}
 
 		setViews();
@@ -134,30 +124,30 @@ public class VehicleInfoEditActivity extends Activity {
 	class OnImageViewClickListener implements OnClickListener {
 
 		public void onClick(View v) {
-			// TODO: replace the vehicle image of the Info record
+			// TODO: replace the mVehicle image of the Info record
 		}
 
 	}
 
 	private void setViews() {
-		mLicenceText.setText(licence);
-		mTypeText.setText(type);
-		mVinText.setText(vin);
-		mNameText.setText(name);
-		mPhoneText.setText(phone);
-		if (gender != null) {
-			boolean genderMale = gender.equals(getString(R.string.male));
-			mGenderMaleButton.setChecked(genderMale);
-			mGenderFemaleButton.setChecked(!genderMale);
-		}
-		mBirthText.setText(birth);
-		mDrivingLicenceText.setText(drivingLicence);
-		mNoteText.setText(note);
-		Bitmap bitmap = getBitmapByName(vehicle);
+		Bitmap bitmap = getBitmapByName(mVehicle);
 		if (bitmap != null) {
 			mImageView.setImageBitmap(bitmap);
 		}
 
+		mLicenceText.setText(mLicence);
+		mTypeText.setText(mType);
+		mVinText.setText(mVin);
+		mNameText.setText(mName);
+		mPhoneText.setText(mPhone);
+		if (mGender != null) {
+			boolean genderMale = mGender.equals(getString(R.string.male));
+			mGenderMaleButton.setChecked(genderMale);
+			mGenderFemaleButton.setChecked(!genderMale);
+		}
+		mBirthText.setText(mBirth);
+		mDrivingLicenceText.setText(mDrivingLicence);
+		mNoteText.setText(mNote);
 	}
 
 	@Override
@@ -198,28 +188,43 @@ public class VehicleInfoEditActivity extends Activity {
 		// this's onStop, the info list won't be updated.
 
 		ContentValues values = new ContentValues();
-		values.put(TABLE_INFO_COLUMNS[TABLE_INFO_COLUMN_LICENCE], mLicenceText
-				.getText().toString());
-		values.put(TABLE_INFO_COLUMNS[TABLE_INFO_COLUMN_TYPE], mTypeText
-				.getText().toString());
-		values.put(TABLE_INFO_COLUMNS[TABLE_INFO_COLUMN_VIN], mVinText
-				.getText().toString());
-		values.put(TABLE_INFO_COLUMNS[TABLE_INFO_COLUMN_NAME], mNameText
-				.getText().toString());
-		values.put(TABLE_INFO_COLUMNS[TABLE_INFO_COLUMN_PHONE], mPhoneText
-				.getText().toString());
+		if (mLicenceText.getText() != null) {
+			values.put(TABLE_INFO_COLUMNS[TABLE_INFO_COLUMN_LICENCE],
+					mLicenceText.getText().toString());
+		}
+		if (mTypeText.getText() != null) {
+			values.put(TABLE_INFO_COLUMNS[TABLE_INFO_COLUMN_TYPE], mTypeText
+					.getText().toString());
+		}
+		if (mVinText.getText() != null) {
+			values.put(TABLE_INFO_COLUMNS[TABLE_INFO_COLUMN_VIN], mVinText
+					.getText().toString());
+		}
+		if (mNameText.getText() != null) {
+			values.put(TABLE_INFO_COLUMNS[TABLE_INFO_COLUMN_NAME], mNameText
+					.getText().toString());
+		}
+		if (mPhoneText.getText() != null) {
+			values.put(TABLE_INFO_COLUMNS[TABLE_INFO_COLUMN_PHONE], mPhoneText
+					.getText().toString());
+		}
 		values.put(
 				TABLE_INFO_COLUMNS[TABLE_INFO_COLUMN_GENDER],
 				mGenderMaleButton.isChecked() ? getString(R.string.male)
 						: mGenderFemaleButton.isChecked() ? getString(R.string.female)
 								: null);
-		values.put(TABLE_INFO_COLUMNS[TABLE_INFO_COLUMN_BIRTH], mBirthText
-				.getText().toString());
-		values.put(TABLE_INFO_COLUMNS[TABLE_INFO_COLUMN_DRIVING_LICENCE],
-				mDrivingLicenceText.getText().toString());
-		values.put(TABLE_INFO_COLUMNS[TABLE_INFO_COLUMN_NOTE], mNoteText
-				.getText().toString());
-		values.put(TABLE_INFO_COLUMNS[TABLE_INFO_COLUMN_PHOTO], vehicle);
+		if (mBirthText.getText() != null) {
+			values.put(TABLE_INFO_COLUMNS[TABLE_INFO_COLUMN_BIRTH], mBirthText
+					.getText().toString());
+		}
+		if (mDrivingLicenceText.getText() != null) {
+			values.put(TABLE_INFO_COLUMNS[TABLE_INFO_COLUMN_DRIVING_LICENCE],
+					mDrivingLicenceText.getText().toString());
+		}
+		if (mNoteText.getText() != null) {
+			values.put(TABLE_INFO_COLUMNS[TABLE_INFO_COLUMN_NOTE], mNoteText
+					.getText().toString());
+		}
 
 		SQLiteOpenHelper helper = new ViqSQLiteOpenHelper(this);
 		SQLiteDatabase database = helper.getWritableDatabase();

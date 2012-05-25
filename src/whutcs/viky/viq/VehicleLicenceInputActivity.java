@@ -212,53 +212,47 @@ public class VehicleLicenceInputActivity extends Activity {
 
 	private class OnOkClickListener implements OnClickListener {
 
-		/**
-		 * Create a new query by calling VehicleItemViewActivity with the input
-		 * licence number.
-		 */
 		public void onClick(View v) {
+			String licence;
 			StringBuilder builder = new StringBuilder();
 			for (int col = 0; col < PLATECHARS; col++) {
 				builder.append(mCandidateChars[mSelections[0]][col]);
 			}
-			String licence = builder.toString();
+			licence = builder.toString();
 
-			Intent itemShowIntent = new Intent(
-					VehicleLicenceInputActivity.this,
-					VehicleItemViewActivity.class);
 			String vehicle = null;
 			if (mVehicleImageFile != null) {
 				vehicle = mVehicleImageFile.getName();
 			}
 
-			createQueryRecord(licence, vehicle);
+			// createQueryRecord(licence, vehicle);
 
-			itemShowIntent.putExtra(EXTRA_LICENCE, licence).putExtra(
-					EXTRA_VEHICLE, vehicle);
-			startActivity(itemShowIntent);
+			startActivity(new Intent(VehicleLicenceInputActivity.this,
+					VehicleQueryEditActivity.class).putExtra(EXTRA_LICENCE,
+					licence).putExtra(EXTRA_VEHICLE, vehicle));
 
 			finish();
 		}
 	}
 
-	private void createQueryRecord(String licence, String vehicle) {
-		String datetime = getDataTimeString();
-		String gps = getGpsString(this);
-
-		ContentValues values = new ContentValues();
-		values.put(TABLE_QUERY_COLUMNS[TABLE_QUERY_COLUMN_TIME], datetime);
-		values.put(TABLE_QUERY_COLUMNS[TABLE_QUERY_COLUMN_PLACE], gps);
-		values.put(TABLE_QUERY_COLUMNS[TABLE_QUERY_COLUMN_NOTE], "");
-		values.put(TABLE_QUERY_COLUMNS[TABLE_QUERY_COLUMN_PHOTO], vehicle);
-		values.put(SPECIAL_COLUMN_LICENCE, licence);
-
-		ViqSQLiteOpenHelper helper = new ViqSQLiteOpenHelper(this);
-		SQLiteDatabase database = helper.getWritableDatabase();
-		long rowid = database.insert(TABLE_QUERY, null, values);
-		Log.v(TAG, "rowid: " + rowid);
-		database.close();
-		helper.close();
-	}
+	// private void createQueryRecord(String licence, String vehicle) {
+	// String datetime = getDataTimeString();
+	// String gps = getGpsString(this);
+	//
+	// ContentValues values = new ContentValues();
+	// values.put(TABLE_QUERY_COLUMNS[TABLE_QUERY_COLUMN_TIME], datetime);
+	// values.put(TABLE_QUERY_COLUMNS[TABLE_QUERY_COLUMN_PLACE], gps);
+	// values.put(TABLE_QUERY_COLUMNS[TABLE_QUERY_COLUMN_NOTE], "");
+	// values.put(TABLE_QUERY_COLUMNS[TABLE_QUERY_COLUMN_PHOTO], vehicle);
+	// values.put(SPECIAL_COLUMN_LICENCE, licence);
+	//
+	// ViqSQLiteOpenHelper helper = new ViqSQLiteOpenHelper(this);
+	// SQLiteDatabase database = helper.getWritableDatabase();
+	// long rowid = database.insert(TABLE_QUERY, null, values);
+	// Log.v(TAG, "rowid: " + rowid);
+	// database.close();
+	// helper.close();
+	// }
 
 	private class OnCancelClickListener implements OnClickListener {
 

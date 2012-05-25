@@ -21,6 +21,7 @@ import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY_COLUMNS;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY_COLUMN_PHOTO;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY_COLUMN_PLACE;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY_COLUMN_TIME;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.VIEW_QUERY_INFO_COLUMN_LICENCE;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.VIEW_QUERY_INFO_COLUMN_NOTE;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.VIEW_QUERY_INFO_COLUMN_PLACE;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.VIEW_QUERY_INFO_COLUMN_TIME;
@@ -43,6 +44,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ImageView;
@@ -52,9 +54,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 /**
- * Query the database with the given row id of a vehicle Info record or licence
- * number, show the vehicle's and owner's basic information and historical
- * queries.
+ * Query the database with the given row id or licence number, show the mVehicle
+ * information and its check records.
  * 
  * @author xyxzfj@gmail.com
  * 
@@ -62,20 +63,19 @@ import android.widget.Toast;
 public class VehicleItemViewActivity extends ViqShakeableListActicity {
 	private static final String TAG = "VehicleItemViewActivity";
 
-	// these fields are from the calling intent
 	private Long mId;
+
 	private String mLicence;
 
-	// private String licence;
-	private String type;
-	private String vin;
-	private String name;
-	private String phone;
-	private String gender;
-	private String birth;
-	private String drivingLicence;
-	private String note;
-	private String vehicle;
+	private String mVehicle;
+	private String mType;
+	private String mVin;
+	private String mName;
+	private String mPhone;
+	private String mGender;
+	private String mBirth;
+	private String mDrivingLicence;
+	private String mNote;
 
 	private ViqSQLiteOpenHelper mHelper;
 
@@ -98,6 +98,7 @@ public class VehicleItemViewActivity extends ViqShakeableListActicity {
 			return;
 		}
 
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.vehicle_item_view);
 
 		mHelper = new ViqSQLiteOpenHelper(this);
@@ -118,10 +119,17 @@ public class VehicleItemViewActivity extends ViqShakeableListActicity {
 		super.onDestroy();
 		Log.v(TAG, "onDestroy");
 
+		// close the binding cursor
+		Cursor cursor = null;
 		SimpleCursorAdapter adapter = (SimpleCursorAdapter) getListView()
 				.getAdapter();
-		Cursor cursor = adapter.getCursor();
-		cursor.close();
+		if (adapter != null) {
+			cursor = adapter.getCursor();
+		}
+		if (cursor != null) {
+			cursor.close();
+		}
+
 		mHelper.close();
 	}
 
@@ -130,10 +138,16 @@ public class VehicleItemViewActivity extends ViqShakeableListActicity {
 			ContextMenuInfo menuInfo) {
 		super.onCreateContextMenu(menu, v, menuInfo);
 
+		mContextMenuInfo = (AdapterContextMenuInfo) menuInfo;
+
+		int position = mContextMenuInfo.position;
+		Cursor cursor = (Cursor) getListAdapter().getItem(position);
+		String time = cursor.getString(TABLE_QUERY_COLUMN_TIME);
+		String relativeTime = getRelativeTime(this, time);
+
+		menu.setHeaderTitle(relativeTime);
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.vehicle_item_query_list_context_menu, menu);
-
-		mContextMenuInfo = (AdapterContextMenuInfo) menuInfo;
 	}
 
 	@Override
@@ -151,12 +165,12 @@ public class VehicleItemViewActivity extends ViqShakeableListActicity {
 		Cursor cursor = (Cursor) getListAdapter().getItem(position);
 		String time = cursor.getString(TABLE_QUERY_COLUMN_TIME);
 		String place = cursor.getString(TABLE_QUERY_COLUMN_PLACE);
-		String note = cursor.getString(TABLE_QUERY_COLUMN_NOTE);
+		String mNote = cursor.getString(TABLE_QUERY_COLUMN_NOTE);
 
 		StringBuilder builder = new StringBuilder();
 		String comma = getString(R.string.comma) + " ";
 		builder.append(time).append(comma).append(place).append(comma)
-				.append(note);
+				.append(mNote);
 		String all = builder.toString();
 
 		ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
@@ -167,8 +181,14 @@ public class VehicleItemViewActivity extends ViqShakeableListActicity {
 					.putExtra("_id", id));
 			break;
 		case R.id.menu_delete:
-			deleteQuery(id, time);
+			deleteItem(id, time);
 			break;
+		case R.id.menu_sms_all:
+			startActivity(new Intent(Intent.ACTION_SENDTO, Uri.parse("smsto:"))
+					.putExtra("sms_body", all));
+			break;
+
+		// Menu item menu_copy's sub menu's menu items:
 		case R.id.menu_copy_time:
 			clipboard.setText(time);
 			break;
@@ -176,14 +196,10 @@ public class VehicleItemViewActivity extends ViqShakeableListActicity {
 			clipboard.setText(place);
 			break;
 		case R.id.menu_copy_note:
-			clipboard.setText(note);
+			clipboard.setText(mNote);
 			break;
 		case R.id.menu_copy_all:
 			clipboard.setText(all);
-			break;
-		case R.id.menu_sms_all:
-			startActivity(new Intent(Intent.ACTION_SENDTO, Uri.parse("smsto:"))
-					.putExtra("sms_body", all));
 			break;
 		default:
 			break;
@@ -197,7 +213,7 @@ public class VehicleItemViewActivity extends ViqShakeableListActicity {
 		boolean result = super.onPrepareOptionsMenu(menu);
 		Log.v(TAG, "onPrepareOptionsMenu");
 
-		// if this vehicle is not in the database, add menu
+		// if this vehicle is not in the database, show menu
 		// mAddToVehicleInfoListMenuItem
 		mAddToVehicleInfoListMenuItem.setVisible(mId == 0);
 		return result;
@@ -234,11 +250,11 @@ public class VehicleItemViewActivity extends ViqShakeableListActicity {
 
 		StringBuilder builder = new StringBuilder();
 		String comma = getString(R.string.comma) + " ";
-		builder.append(mLicence).append(comma).append(type).append(comma)
-				.append(vin).append(comma).append(name).append(comma)
-				.append(phone).append(comma).append(gender).append(comma)
-				.append(birth).append(comma).append(drivingLicence)
-				.append(comma).append(note);
+		builder.append(mLicence).append(comma).append(mType).append(comma)
+				.append(mVin).append(comma).append(mName).append(comma)
+				.append(mPhone).append(comma).append(mGender).append(comma)
+				.append(mBirth).append(comma).append(mDrivingLicence)
+				.append(comma).append(mNote);
 		String all = builder.toString();
 
 		ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
@@ -252,17 +268,21 @@ public class VehicleItemViewActivity extends ViqShakeableListActicity {
 					.putExtra("_id", mId));
 			break;
 		case R.id.menu_call_owner:
-			if (phone == null || phone.length() == 0) {
+			if (mPhone == null || mPhone.length() == 0) {
 				Toast.makeText(this, getString(R.string.no_phone_found),
 						Toast.LENGTH_SHORT).show();
 			} else {
 				startActivity(new Intent(Intent.ACTION_CALL).setData(Uri
-						.parse("tel:" + phone)));
+						.parse("tel:" + mPhone)));
 			}
 			break;
 		case R.id.menu_sms_all:
 			startActivity(new Intent(Intent.ACTION_SENDTO, Uri.parse("smsto:"))
 					.putExtra("sms_body", all));
+			break;
+		case R.id.menu_fast_check:
+			startActivity(new Intent(this, VehicleQueryEditActivity.class)
+					.putExtra(EXTRA_LICENCE, mLicence));
 			break;
 
 		// Menu item menu_copy's sub menu's menu items:
@@ -270,22 +290,22 @@ public class VehicleItemViewActivity extends ViqShakeableListActicity {
 			clipboard.setText(mLicence);
 			break;
 		case R.id.menu_copy_vin:
-			clipboard.setText(vin);
+			clipboard.setText(mVin);
 			break;
 		case R.id.menu_copy_owner_name:
-			clipboard.setText(name);
+			clipboard.setText(mName);
 			break;
 		case R.id.menu_copy_owner_phone_number:
-			clipboard.setText(phone);
+			clipboard.setText(mPhone);
 			break;
 		case R.id.menu_copy_owner_gender_birth:
-			clipboard.setText(gender + comma + birth);
+			clipboard.setText(mGender + comma + mBirth);
 			break;
 		case R.id.menu_copy_owner_driving_licence:
-			clipboard.setText(drivingLicence);
+			clipboard.setText(mDrivingLicence);
 			break;
 		case R.id.menu_copy_note:
-			clipboard.setText(note);
+			clipboard.setText(mNote);
 			break;
 		case R.id.menu_copy_all:
 			clipboard.setText(all);
@@ -299,16 +319,16 @@ public class VehicleItemViewActivity extends ViqShakeableListActicity {
 	}
 
 	/**
-	 * Prompt the user whether to delete the query item.
+	 * Prompt the user whether to delete the item.
 	 * 
 	 * @param mId
 	 *            the row mId of the item.
 	 * @param licence
-	 *            the name to distinguish of the item.
+	 *            the mName to distinguish the item.
 	 */
-	private void deleteQuery(final long mId, String name) {
+	private void deleteItem(final long mId, String mName) {
 		new AlertDialog.Builder(this)
-				.setTitle(getString(R.string.delete_confirm) + " " + name)
+				.setTitle(getString(R.string.delete_confirm) + " " + mName)
 				.setPositiveButton(R.string.ok, new OnClickListener() {
 
 					public void onClick(DialogInterface dialog, int which) {
@@ -337,32 +357,32 @@ public class VehicleItemViewActivity extends ViqShakeableListActicity {
 		if (infoCursor.getCount() > 0) {
 			infoCursor.moveToFirst();
 			mId = infoCursor.getLong(0);
+			mVehicle = infoCursor.getString(TABLE_INFO_COLUMN_PHOTO);
 			mLicence = infoCursor.getString(TABLE_INFO_COLUMN_LICENCE);
-			type = infoCursor.getString(TABLE_INFO_COLUMN_TYPE);
-			vin = infoCursor.getString(TABLE_INFO_COLUMN_VIN);
-			name = infoCursor.getString(TABLE_INFO_COLUMN_NAME);
-			phone = infoCursor.getString(TABLE_INFO_COLUMN_PHONE);
-			gender = infoCursor.getString(TABLE_INFO_COLUMN_GENDER);
-			birth = infoCursor.getString(TABLE_INFO_COLUMN_BIRTH);
-			drivingLicence = infoCursor
+			mType = infoCursor.getString(TABLE_INFO_COLUMN_TYPE);
+			mVin = infoCursor.getString(TABLE_INFO_COLUMN_VIN);
+			mName = infoCursor.getString(TABLE_INFO_COLUMN_NAME);
+			mPhone = infoCursor.getString(TABLE_INFO_COLUMN_PHONE);
+			mGender = infoCursor.getString(TABLE_INFO_COLUMN_GENDER);
+			mBirth = infoCursor.getString(TABLE_INFO_COLUMN_BIRTH);
+			mDrivingLicence = infoCursor
 					.getString(TABLE_INFO_COLUMN_DRIVING_LICENCE);
-			note = infoCursor.getString(TABLE_INFO_COLUMN_NOTE);
-			vehicle = infoCursor.getString(TABLE_INFO_COLUMN_PHOTO);
+			mNote = infoCursor.getString(TABLE_INFO_COLUMN_NOTE);
 
-			((TextView) findViewById(R.id.licence)).setText(mLicence);
-			((TextView) findViewById(R.id.type)).setText(type);
-			((TextView) findViewById(R.id.vin)).setText(vin);
-			((TextView) findViewById(R.id.name)).setText(name);
-			((TextView) findViewById(R.id.phone)).setText(phone);
-			((TextView) findViewById(R.id.gender)).setText(gender);
-			((TextView) findViewById(R.id.birth)).setText(birth);
-			((TextView) findViewById(R.id.dirving_licence))
-					.setText(drivingLicence);
-			((TextView) findViewById(R.id.note)).setText(note);
-			Bitmap bitmap = getBitmapByName(vehicle);
+			Bitmap bitmap = getBitmapByName(mVehicle);
 			if (bitmap != null) {
 				((ImageView) findViewById(R.id.vehicle)).setImageBitmap(bitmap);
 			}
+			((TextView) findViewById(R.id.licence)).setText(mLicence);
+			((TextView) findViewById(R.id.type)).setText(mType);
+			((TextView) findViewById(R.id.vin)).setText(mVin);
+			((TextView) findViewById(R.id.name)).setText(mName);
+			((TextView) findViewById(R.id.phone)).setText(mPhone);
+			((TextView) findViewById(R.id.gender)).setText(mGender);
+			((TextView) findViewById(R.id.birth)).setText(mBirth);
+			((TextView) findViewById(R.id.dirving_licence))
+					.setText(mDrivingLicence);
+			((TextView) findViewById(R.id.note)).setText(mNote);
 		}
 		infoCursor.close();
 		database.close();

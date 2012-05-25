@@ -91,5 +91,8 @@
     <string name="saved">已保存</string>
     <string name="save">保存</string>
     <string name="revert">撤消更改</string>
+    <string name="place">地点</string>
+    <string name="fast_check">登记该车</string>
+    <string name="time">时间</string>
     
 </resources>
