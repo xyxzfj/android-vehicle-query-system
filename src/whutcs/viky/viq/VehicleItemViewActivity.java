@@ -1,11 +1,6 @@
 package whutcs.viky.viq;
 
 import static whutcs.viky.viq.ViqCommonUtilities.*;
-import static whutcs.viky.viq.ViqCommonUtilities.EXTRA_VEHICLE;
-import static whutcs.viky.viq.ViqCommonUtilities.getBitmapByName;
-import static whutcs.viky.viq.ViqCommonUtilities.getDataTimeString;
-import static whutcs.viky.viq.ViqCommonUtilities.getGpsString;
-import static whutcs.viky.viq.ViqSQLiteOpenHelper.SPECIAL_COLUMN_LICENCE;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMNS;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_BIRTH;
@@ -21,12 +16,7 @@ import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY_COLUMNS;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY_COLUMN_PHOTO;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY_COLUMN_PLACE;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY_COLUMN_TIME;
-import static whutcs.viky.viq.ViqSQLiteOpenHelper.VIEW_QUERY_INFO_COLUMN_LICENCE;
-import static whutcs.viky.viq.ViqSQLiteOpenHelper.VIEW_QUERY_INFO_COLUMN_NOTE;
-import static whutcs.viky.viq.ViqSQLiteOpenHelper.VIEW_QUERY_INFO_COLUMN_PLACE;
-import static whutcs.viky.viq.ViqSQLiteOpenHelper.VIEW_QUERY_INFO_COLUMN_TIME;
 import android.app.AlertDialog;
-import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
@@ -34,6 +24,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.opengl.Visibility;
 import android.os.Bundle;
 import android.text.ClipboardManager;
 import android.util.Log;
@@ -42,12 +33,11 @@ import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View;
 import android.view.Window;
-import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.SimpleCursorAdapter;
 import android.widget.SimpleCursorAdapter.ViewBinder;
 import android.widget.TextView;
@@ -98,7 +88,6 @@ public class VehicleItemViewActivity extends ViqShakeableListActicity {
 			return;
 		}
 
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.vehicle_item_view);
 
 		mHelper = new ViqSQLiteOpenHelper(this);
@@ -143,9 +132,8 @@ public class VehicleItemViewActivity extends ViqShakeableListActicity {
 		int position = mContextMenuInfo.position;
 		Cursor cursor = (Cursor) getListAdapter().getItem(position);
 		String time = cursor.getString(TABLE_QUERY_COLUMN_TIME);
-		String relativeTime = getRelativeTime(this, time);
 
-		menu.setHeaderTitle(relativeTime);
+		menu.setHeaderTitle(time);
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.vehicle_item_query_list_context_menu, menu);
 	}
@@ -178,7 +166,7 @@ public class VehicleItemViewActivity extends ViqShakeableListActicity {
 		switch (item.getItemId()) {
 		case R.id.menu_edit:
 			startActivity(new Intent(this, VehicleQueryEditActivity.class)
-					.putExtra("_id", id));
+					.putExtra(EXTRA_ID, id));
 			break;
 		case R.id.menu_delete:
 			deleteItem(id, time);
@@ -265,7 +253,7 @@ public class VehicleItemViewActivity extends ViqShakeableListActicity {
 			break;
 		case R.id.menu_edit:
 			startActivity(new Intent(this, VehicleInfoEditActivity.class)
-					.putExtra("_id", mId));
+					.putExtra(EXTRA_ID, mId));
 			break;
 		case R.id.menu_call_owner:
 			if (mPhone == null || mPhone.length() == 0) {
@@ -323,12 +311,12 @@ public class VehicleItemViewActivity extends ViqShakeableListActicity {
 	 * 
 	 * @param mId
 	 *            the row mId of the item.
-	 * @param licence
-	 *            the mName to distinguish the item.
+	 * @param caption
+	 *            the caption to distinguish the item.
 	 */
-	private void deleteItem(final long mId, String mName) {
+	private void deleteItem(final long mId, String caption) {
 		new AlertDialog.Builder(this)
-				.setTitle(getString(R.string.delete_confirm) + " " + mName)
+				.setTitle(getString(R.string.delete_confirm) + " " + caption)
 				.setPositiveButton(R.string.ok, new OnClickListener() {
 
 					public void onClick(DialogInterface dialog, int which) {
@@ -354,7 +342,10 @@ public class VehicleItemViewActivity extends ViqShakeableListActicity {
 			infoCursor = database.query(TABLE_INFO, TABLE_INFO_COLUMNS,
 					"licence=?", new String[] { mLicence }, null, null, null);
 		}
+
+		LinearLayout basicInfoLoyout = (LinearLayout) findViewById(R.id.basic_info);
 		if (infoCursor.getCount() > 0) {
+			basicInfoLoyout.setVisibility(View.VISIBLE);
 			infoCursor.moveToFirst();
 			mId = infoCursor.getLong(0);
 			mVehicle = infoCursor.getString(TABLE_INFO_COLUMN_PHOTO);
@@ -383,6 +374,8 @@ public class VehicleItemViewActivity extends ViqShakeableListActicity {
 			((TextView) findViewById(R.id.dirving_licence))
 					.setText(mDrivingLicence);
 			((TextView) findViewById(R.id.note)).setText(mNote);
+		} else {
+			basicInfoLoyout.setVisibility(View.GONE);
 		}
 		infoCursor.close();
 		database.close();
@@ -420,8 +413,6 @@ public class VehicleItemViewActivity extends ViqShakeableListActicity {
 									imageName, imageView);
 							fetchCacher.run();
 							result = true;
-						} else {
-							imageView.setImageResource(R.drawable.vehicle);
 						}
 					} else if (columnIndex == TABLE_QUERY_COLUMN_TIME) {
 						TextView textView = (TextView) view;
@@ -435,6 +426,7 @@ public class VehicleItemViewActivity extends ViqShakeableListActicity {
 							relativeTime = time;
 						}
 						textView.setText(relativeTime);
+						result = true;
 					}
 					return result;
 				}

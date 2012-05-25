@@ -20,15 +20,16 @@
         android:label="@string/app_name" >
         <activity
             android:name=".VehicleInfoListActivity"
-            android:icon="@drawable/database"
-            android:label="@string/vehicle_query_system" >
+            android:icon="@drawable/vehicle"
+            android:label="@string/palm_vehicle_query_system" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
+        <activity android:name=".VehicleQueryListActivity" android:icon="@drawable/vehicle" android:label="@string/vehicle_query_list">
+        </activity><activity
             android:name=".VehicleLicenceInputActivity"
             android:icon="@drawable/camera"
             android:label="@string/licence_input"
@@ -36,24 +37,18 @@
         </activity>
         <activity
             android:name=".VehicleItemViewActivity"
-            android:label="@string/item_view" >
+            android:label="@string/item_view" android:theme="@android:style/Theme.NoTitleBar">
         </activity>
-        <activity
-            android:name=".VehicleQueryListActivity"
-            android:icon="@drawable/vehicle"
-            android:label="@string/vehicle_query_list" >
-        </activity>
-        <activity
-            android:name=".ViqPreferenceActivity"
-            android:label="@string/preference" >
-        </activity>
+        
+        
         <activity
             android:name=".VehicleInfoEditActivity"
-            android:label="@string/info_edit" >
+            android:label="@string/edit_vehicle_info" >
         </activity>
         <activity
             android:name=".VehicleQueryEditActivity"
-            android:label="@string/query_edit" >
+            android:label="@string/edit_vehicle_query" >
+        </activity><activity android:name=".ViqPreferenceActivity" android:label="@string/preference">
         </activity>
     </application>
 

@@ -41,20 +41,10 @@ import static whutcs.viky.viq.ViqCommonUtilities.EXTRA_LICENCE;
 import static whutcs.viky.viq.ViqCommonUtilities.EXTRA_VEHICLE;
 import static whutcs.viky.viq.ViqCommonUtilities.fileCopy;
 import static whutcs.viky.viq.ViqCommonUtilities.getBitmap;
-import static whutcs.viky.viq.ViqCommonUtilities.getDataTimeString;
 import static whutcs.viky.viq.ViqCommonUtilities.getDcimDirectory;
-import static whutcs.viky.viq.ViqCommonUtilities.getGpsString;
 import static whutcs.viky.viq.ViqCommonUtilities.getNewImageFile;
 import static whutcs.viky.viq.ViqCommonUtilities.streamCopy;
-import static whutcs.viky.viq.ViqCommonUtilities.uriToImagePath;
-import static whutcs.viky.viq.ViqSQLiteOpenHelper.SPECIAL_COLUMN_LICENCE;
-import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY;
-import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY_COLUMNS;
-import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY_COLUMN_NOTE;
-import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY_COLUMN_PHOTO;
-import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY_COLUMN_PLACE;
-import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY_COLUMN_TIME;
-
+import static whutcs.viky.viq.ViqCommonUtilities.*;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -63,10 +53,8 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 
 import android.app.Activity;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
@@ -118,9 +106,6 @@ public class VehicleLicenceInputActivity extends Activity {
 	public static final String SAVE_IMAGE_PATH = getDcimDirectory("viq_save")
 			.getPath() + File.separator;
 
-	private static final int CODE_TAKE_PHOTO = 0;
-	private static final int CODE_SELECT_PHOTO = 1;
-
 	/**
 	 * The file of the vehicle image taken or selected.
 	 */
@@ -166,6 +151,7 @@ public class VehicleLicenceInputActivity extends Activity {
 	 */
 	private final ResultEditText[] mResultTexts = new ResultEditText[PLATECHARS];
 
+	private EditText mLicenceText;
 	private TableLayout mTableLayout;
 
 	@Override
@@ -173,14 +159,15 @@ public class VehicleLicenceInputActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.vehicle_licence_input);
 
+		mLicenceText = (EditText) findViewById(R.id.licence);
+		mTableLayout = (TableLayout) findViewById(R.id.table);
 		Button okButton = (Button) findViewById(R.id.query_ok);
 		Button cancelButton = (Button) findViewById(R.id.query_cancel);
-		mTableLayout = (TableLayout) findViewById(R.id.table);
 
 		// add result edit texts row
 		TableRow resultRow = new TableRow(this);
 		for (int col = 0; col < PLATECHARS; col++) {
-			ResultEditText text = new ResultEditText(this, col, mResultTexts);
+			ResultEditText text = new ResultEditText(col);
 			mResultTexts[col] = text;
 			resultRow.addView(text);
 		}
@@ -213,12 +200,10 @@ public class VehicleLicenceInputActivity extends Activity {
 	private class OnOkClickListener implements OnClickListener {
 
 		public void onClick(View v) {
-			String licence;
-			StringBuilder builder = new StringBuilder();
-			for (int col = 0; col < PLATECHARS; col++) {
-				builder.append(mCandidateChars[mSelections[0]][col]);
+			String licence = null;
+			if (mLicenceText.getText() != null) {
+				licence = mLicenceText.getText().toString();
 			}
-			licence = builder.toString();
 
 			String vehicle = null;
 			if (mVehicleImageFile != null) {
@@ -747,9 +732,8 @@ public class VehicleLicenceInputActivity extends Activity {
 		 *            this edit text's index at resultTexts.
 		 * @param resultTexts
 		 */
-		public ResultEditText(Context context, final int i,
-				final ResultEditText[] resultTexts) {
-			super(context);
+		public ResultEditText(final int i) {
+			super(VehicleLicenceInputActivity.this);
 
 			// Set max length of MAXLEN.
 			setFilters(new InputFilter[] { new InputFilter.LengthFilter(MAXLEN) });
@@ -785,10 +769,15 @@ public class VehicleLicenceInputActivity extends Activity {
 							mEditText.setText(text.toUpperCase());
 						}
 						// Move to the next result text.
-						resultTexts[(i + 1) % resultTexts.length]
+						mResultTexts[(i + 1) % mResultTexts.length]
 								.requestFocus();
 					}
 
+					StringBuilder builder = new StringBuilder();
+					for (int col = 0; col < PLATECHARS; col++) {
+						builder.append(mResultTexts[col].getText().toString());
+					}
+					mLicenceText.setText(builder.toString());
 				}
 			});
 		}

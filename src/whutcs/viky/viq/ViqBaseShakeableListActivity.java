@@ -1,10 +1,7 @@
 package whutcs.viky.viq;
 
-import static whutcs.viky.viq.ViqCommonUtilities.EXTRA_LICENCE;
-import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY;
-import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY_COLUMN_LICENCE;
+import android.R.integer;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
@@ -29,7 +26,8 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
 /**
- * Base class handling common list related tasks.
+ * Base class handling common list related tasks for the two list activities in
+ * this app.
  * 
  * @author xyxzfj@gmail.com
  * 
@@ -38,25 +36,15 @@ public abstract class ViqBaseShakeableListActivity extends
 		ViqShakeableListActicity {
 	private static final String TAG = "ViqBaseShakeableListActivity";
 
-	// view settings
-	protected int mLayoutResID = R.layout.vehicle_item_list;
-	protected int mListItemId;
+	// need to be overridden:
 	protected String mDefaultTitle;
-
-	// database constants
-	protected String mViewName;
-	protected String mTableName;
-	protected String[] mFrom;
-	protected int[] mTo;
-	protected String mSelection;
-	protected String mOrderBy;
-	protected int mColumnLicence;
+	protected String mForwardButtonText;
+	protected Class<?> mForwardClass;
+	protected String mWriteableTableName;
 
 	// views
 	protected ListView mListView;
-
 	protected Button mForwardButton;
-
 	protected Button mQuickSearchButton;
 	protected Button mNewQueryButton;
 	protected EditText mFilterText;
@@ -72,7 +60,7 @@ public abstract class ViqBaseShakeableListActivity extends
 		Log.v(TAG, "onCreate");
 
 		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
-		setContentView(mLayoutResID);
+		setContentView(R.layout.vehicle_item_list);
 		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE,
 				R.layout.viq_title);
 
@@ -87,11 +75,13 @@ public abstract class ViqBaseShakeableListActivity extends
 		mMatchesView = (TextView) findViewById(R.id.matches);
 
 		mFilterText.setText(mDefaultTitle);
+		mForwardButton.setText(mForwardButtonText);
 
 		registerForContextMenu(mListView);
 
 		mListView.setOnTouchListener(new OnListViewTouchListener());
 
+		mForwardButton.setOnClickListener(new OnForwardButtonClickListener());
 		mQuickSearchButton
 				.setOnClickListener(new OnQuickSearchButtonClickListener());
 		mNewQueryButton.setOnClickListener(new OnNewQueryButtonClickListener());
@@ -149,6 +139,16 @@ public abstract class ViqBaseShakeableListActivity extends
 		}
 
 		mHelper.close();
+	}
+
+	protected class OnForwardButtonClickListener implements
+			View.OnClickListener {
+		public void onClick(View v) {
+			startActivity(new Intent(ViqBaseShakeableListActivity.this,
+					mForwardClass));
+			// switch between the two list activities
+			finish();
+		}
 	}
 
 	protected class OnQuickSearchButtonClickListener implements
@@ -242,13 +242,14 @@ public abstract class ViqBaseShakeableListActivity extends
 		super.onListItemClick(l, v, position, id);
 		Log.v(TAG, "onListItemClick");
 
-		// Retrieve the cursor (row) that defines the clicked item.
-		Cursor cursor = (Cursor) getListAdapter().getItem(position);
-		// Get the licence field of the clicked item
-		String licence = cursor.getString(mColumnLicence);
-
-		startActivity(new Intent(this, VehicleItemViewActivity.class).putExtra(
-				EXTRA_LICENCE, licence));
+		// // Retrieve the cursor (row) that defines the clicked item.
+		// Cursor cursor = (Cursor) getListAdapter().getItem(position);
+		// // Get the licence field of the clicked item
+		// String licence = cursor.getString(mColumnLicence);
+		//
+		// startActivity(new Intent(this,
+		// VehicleItemViewActivity.class).putExtra(
+		// EXTRA_LICENCE, licence));
 	}
 
 	/**
@@ -305,9 +306,9 @@ public abstract class ViqBaseShakeableListActivity extends
 		return filter;
 	}
 
-	protected void deleteItem(final long id, String name) {
+	protected void deleteItem(final long id, String caption) {
 		new AlertDialog.Builder(this)
-				.setTitle(getString(R.string.delete_confirm) + " " + name)
+				.setTitle(getString(R.string.delete_confirm) + " " + caption)
 				.setPositiveButton(R.string.ok,
 						new DialogInterface.OnClickListener() {
 
@@ -317,8 +318,8 @@ public abstract class ViqBaseShakeableListActivity extends
 										ViqBaseShakeableListActivity.this);
 								SQLiteDatabase database = helper
 										.getWritableDatabase();
-								int deleted = database.delete(mTableName,
-										"_id=?",
+								int deleted = database.delete(
+										mWriteableTableName, "_id=?",
 										new String[] { Long.toString(id) });
 								Log.v(TAG, deleted + " deleted!");
 								database.close();

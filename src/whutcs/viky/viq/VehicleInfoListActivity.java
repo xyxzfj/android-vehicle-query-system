@@ -1,15 +1,26 @@
 package whutcs.viky.viq;
 
-import static whutcs.viky.viq.ViqCommonUtilities.*;
+import static whutcs.viky.viq.ViqCommonUtilities.EXTRA_ID;
+import static whutcs.viky.viq.ViqCommonUtilities.EXTRA_LICENCE;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMNS;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_BIRTH;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_DRIVING_LICENCE;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_GENDER;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_LICENCE;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_NAME;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_NOTE;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_PHONE;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_PHOTO;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_TYPE;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_VIN;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_SELECTION;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.getSelectiionArgs;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import android.app.AlertDialog;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -23,13 +34,11 @@ import android.view.ContextMenu.ContextMenuInfo;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.AdapterView.AdapterContextMenuInfo;
-import android.widget.SimpleCursorAdapter.ViewBinder;
-import android.widget.Adapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+import android.widget.SimpleCursorAdapter.ViewBinder;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -48,31 +57,12 @@ public class VehicleInfoListActivity extends ViqBaseShakeableListActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		mLayoutResID = R.layout.vehicle_item_list;
-		mListItemId = R.layout.vehicle_info_list_item;
-
 		mDefaultTitle = getString(R.string.vehicle_info_list);
-
-		mViewName = TABLE_INFO;
-		mTableName = TABLE_INFO;
-		mFrom = TABLE_INFO_COLUMNS;
-		mTo = new int[] { R.id.rowid, R.id.licence, R.id.type, R.id.vin,
-				R.id.name, R.id.phone, R.id.gender, R.id.birth,
-				R.id.dirving_licence, R.id.note, R.id.vehicle };
-		mSelection = TABLE_INFO_SELECTION;
-		mOrderBy = TABLE_INFO_COLUMNS[TABLE_INFO_COLUMN_LICENCE];
-		mColumnLicence = TABLE_INFO_COLUMN_LICENCE;
+		mForwardButtonText = getString(R.string.vehicle_query_list);
+		mForwardClass = VehicleQueryListActivity.class;
+		mWriteableTableName = TABLE_INFO;
 
 		super.onCreate(savedInstanceState);
-
-		mForwardButton.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				startActivity(new Intent(VehicleInfoListActivity.this,
-						VehicleQueryListActivity.class));
-				// Switch rather than move from one activity to another.
-				finish();
-			}
-		});
 	}
 
 	@Override
@@ -109,7 +99,7 @@ public class VehicleInfoListActivity extends ViqBaseShakeableListActivity {
 
 		// Retrieve the cursor (row) that defines this item.
 		Cursor cursor = (Cursor) getListAdapter().getItem(position);
-		String _id = cursor.getString(cursor.getColumnIndex("_id"));
+		String _id = cursor.getString(cursor.getColumnIndex(EXTRA_ID));
 		Log.v(TAG, "_id at position " + position + ", id " + id + " is " + _id);
 		String licence = cursor.getString(TABLE_INFO_COLUMN_LICENCE);
 		String type = cursor.getString(TABLE_INFO_COLUMN_TYPE);
@@ -140,7 +130,7 @@ public class VehicleInfoListActivity extends ViqBaseShakeableListActivity {
 			break;
 		case R.id.menu_edit:
 			startActivity(new Intent(this, VehicleInfoEditActivity.class)
-					.putExtra("_id", id));
+					.putExtra(EXTRA_ID, id));
 			break;
 		case R.id.menu_delete:
 			deleteItem(id, licence);
@@ -198,6 +188,13 @@ public class VehicleInfoListActivity extends ViqBaseShakeableListActivity {
 	}
 
 	@Override
+	protected void onListItemClick(ListView l, View v, int position, long id) {
+		super.onListItemClick(l, v, position, id);
+		startActivity(new Intent(this, VehicleItemViewActivity.class).putExtra(
+				EXTRA_ID, id));
+	}
+
+	@Override
 	protected void refreshListView() {
 		super.refreshListView();
 
@@ -208,18 +205,24 @@ public class VehicleInfoListActivity extends ViqBaseShakeableListActivity {
 		SQLiteDatabase database = mHelper.getReadableDatabase();
 		// Get the cursor.
 		if (filter.length() == 0) {
-			cursor = database.query(mViewName, mFrom, null, null, null, null,
-					mOrderBy);
+			cursor = database.query(TABLE_INFO, TABLE_INFO_COLUMNS, null, null,
+					null, null, TABLE_INFO_COLUMNS[TABLE_INFO_COLUMN_LICENCE]);
 		} else {
-			String[] selectionArgs = getSelectiionArgs(getFilter(), mFrom);
-			cursor = database.query(mViewName, mFrom, mSelection,
-					selectionArgs, null, null, mOrderBy);
+			String[] selectionArgs = getSelectiionArgs(getFilter(),
+					TABLE_INFO_COLUMNS);
+			cursor = database.query(TABLE_INFO, TABLE_INFO_COLUMNS,
+					TABLE_INFO_SELECTION, selectionArgs, null, null,
+					TABLE_INFO_COLUMNS[TABLE_INFO_COLUMN_LICENCE]);
 		}
 		// Bind or rebind the cursor to the list adapter.
 		SimpleCursorAdapter adapter = (SimpleCursorAdapter) getListAdapter();
 		if (adapter == null) {
-			adapter = new SimpleCursorAdapter(this, mListItemId, cursor, mFrom,
-					mTo);
+			adapter = new SimpleCursorAdapter(this,
+					R.layout.vehicle_info_list_item, cursor,
+					TABLE_INFO_COLUMNS, new int[] { R.id.rowid, R.id.licence,
+							R.id.type, R.id.vin, R.id.name, R.id.phone,
+							R.id.gender, R.id.birth, R.id.dirving_licence,
+							R.id.note, R.id.vehicle });
 			adapter.setViewBinder(new ViewBinder() {
 				public boolean setViewValue(View view, Cursor cursor,
 						int columnIndex) {

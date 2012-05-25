@@ -12,6 +12,12 @@
         android:contentDescription="@string/extracted_licence_image"
         android:maxHeight="100dp" />
 
+    <EditText
+        android:id="@+id/licence"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge" android:inputType="textCapCharacters" android:gravity="center"/>
+
     <TableLayout
         android:id="@+id/table"
         android:layout_width="match_parent"

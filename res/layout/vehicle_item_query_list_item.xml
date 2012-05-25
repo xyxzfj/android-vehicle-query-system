@@ -9,7 +9,7 @@
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:contentDescription="@string/vehicle"
-        android:src="@drawable/vehicle" />
+        android:src="@drawable/blank" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -29,7 +29,6 @@
                     android:id="@+id/time"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/smp_time"
                     android:textAppearance="?android:attr/textAppearanceSmall" />
 
             </LinearLayout>
@@ -37,8 +36,7 @@
             <TextView
                 android:id="@+id/rowid"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/smp_rowid" />
+                android:layout_height="wrap_content"/>
         </LinearLayout>
 
         <TextView
@@ -48,7 +46,6 @@
             android:ellipsize="marquee"
             android:marqueeRepeatLimit="marquee_forever"
             android:singleLine="true"
-            android:text="@string/smp_place"
             android:textAppearance="?android:attr/textAppearanceSmall" />
 
         <TextView
@@ -58,7 +55,6 @@
             android:ellipsize="marquee"
             android:marqueeRepeatLimit="marquee_forever"
             android:singleLine="true"
-            android:text="@string/smp_note"
             android:textAppearance="?android:attr/textAppearanceSmall" />
     </LinearLayout>
 

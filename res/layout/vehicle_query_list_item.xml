@@ -9,7 +9,7 @@
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:contentDescription="@string/vehicle"
-        android:src="@drawable/vehicle" />
+        android:src="@drawable/blank" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -25,14 +25,12 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/smp_licence"
                 android:textAppearance="?android:attr/textAppearanceLarge" />
 
             <TextView
                 android:id="@+id/rowid"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/smp_rowid" />
+                android:layout_height="wrap_content" />
         </LinearLayout>
 
         <LinearLayout
@@ -43,7 +41,6 @@
                 android:id="@+id/name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/smp_name"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
 
             <TextView
@@ -56,7 +53,6 @@
                 android:id="@+id/phone"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/smp_phone"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
         </LinearLayout>
 
@@ -68,7 +64,6 @@
                 android:id="@+id/time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/smp_time"
                 android:textAppearance="?android:attr/textAppearanceSmall" />
 
         </LinearLayout>
@@ -80,7 +75,6 @@
             android:ellipsize="marquee"
             android:marqueeRepeatLimit="marquee_forever"
             android:singleLine="true"
-            android:text="@string/smp_place"
             android:textAppearance="?android:attr/textAppearanceSmall" />
 
         <TextView
@@ -90,7 +84,6 @@
             android:ellipsize="marquee"
             android:marqueeRepeatLimit="marquee_forever"
             android:singleLine="true"
-            android:text="@string/smp_note"
             android:textAppearance="?android:attr/textAppearanceSmall" />
     </LinearLayout>
 

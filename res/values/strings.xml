@@ -28,8 +28,8 @@
     <string name="smp_driving_licence">371322198701202314</string>
     <string name="smp_rowid">1</string>
     <string name="call_owner">联系车主</string>
-    <string name="vehicle_info_list">车辆数据库</string>
-    <string name="vehicle_query_list">车辆查询单</string>
+    <string name="vehicle_info_list">车辆信息库</string>
+    <string name="vehicle_query_list">车辆登记单</string>
     <string name="vehicle_info_list_empty">车辆数据列表为空</string>
     <string name="vehicle_query_list_empty">车辆查询列表为空</string>
     <string name="query_method">查询方式</string>
@@ -82,7 +82,7 @@
     <string name="female">女</string>
     <string name="note">备注</string>
     <string name="image">车辆照片</string>
-    <string name="touch_to_new">触摸照片拍照</string>
+    <string name="touch_to_new">触摸更换照片</string>
     <string name="no_cnl">语言包cnl.traineddata不存在！</string>
     <string name="vehicle_query_system">车辆查询系统</string>
     <string name="add_to_vehicle_info_list">增至车辆数据库</string>
@@ -90,9 +90,12 @@
     <string name="shakeable">摇一摇</string>
     <string name="saved">已保存</string>
     <string name="save">保存</string>
-    <string name="revert">撤消更改</string>
+    <string name="revert">重置</string>
     <string name="place">地点</string>
     <string name="fast_check">登记该车</string>
     <string name="time">时间</string>
+    <string name="edit_vehicle_info">编辑车辆信息</string>
+    <string name="edit_vehicle_query">编辑车辆登记</string>
+    <string name="palm_vehicle_query_system">掌上车辆查询系统</string>
     
 </resources>

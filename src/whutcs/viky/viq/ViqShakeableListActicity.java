@@ -27,7 +27,7 @@ public abstract class ViqShakeableListActicity extends ListActivity implements
 	/**
 	 * to stop from multiple responding
 	 */
-	private boolean shakeAlreadyResponded;
+	protected boolean shakeAlreadyResponded;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

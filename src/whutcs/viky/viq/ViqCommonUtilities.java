@@ -43,9 +43,12 @@ public class ViqCommonUtilities extends ViqSQLiteOpenHelper {
 	 */
 	public static final File DIRECTORY_VIQ = getDcimDirectory(APP_NAME);
 
-	public static final String EXTRA_ID = "id";
+	public static final String EXTRA_ID = "_id";
 	public static final String EXTRA_LICENCE = "licenee";
 	public static final String EXTRA_VEHICLE = "vehicle";
+
+	public static final int CODE_TAKE_PHOTO = 0;
+	public static final int CODE_SELECT_PHOTO = 1;
 
 	public static void streamCopy(InputStream is, OutputStream os)
 			throws IOException {

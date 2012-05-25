@@ -17,6 +17,10 @@
         android:title="@string/send_vehicle_info">
     </item>
     <item
+        android:id="@+id/menu_fast_check"
+        android:title="@string/fast_check">
+    </item>
+    <item
         android:id="@+id/menu_copy"
         android:title="@string/copy">
         <menu>
@@ -53,5 +57,5 @@
             </item>
         </menu>
     </item>
-    
+
 </menu>
