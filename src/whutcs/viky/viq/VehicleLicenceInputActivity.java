@@ -385,7 +385,7 @@ public class VehicleLicenceInputActivity extends Activity {
 			// try to get the right most none space char at plateNumber
 			while (index >= 0) {
 				c = plateNumber.charAt(index--);
-				if (c != SPACE) {
+				if (c != SPACE && c != '\n') {
 					break;
 				}
 			}
@@ -413,8 +413,8 @@ public class VehicleLicenceInputActivity extends Activity {
 		int row = 0;
 		int col = 0;
 		boolean found = false;
-		for (; row < CHARS && !found; row++) {
-			for (; col < likeChars[row].length && !found; col++) {
+		for (row = 0; row < CHARS && !found; row++) {
+			for (col = 0; col < likeChars[row].length && !found; col++) {
 				if (likeChars[row][col] == c) {
 					found = true;
 				}

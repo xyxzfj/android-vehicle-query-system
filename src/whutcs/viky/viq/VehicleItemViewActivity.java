@@ -414,20 +414,21 @@ public class VehicleItemViewActivity extends ViqShakeableListActicity {
 							fetchCacher.run();
 							result = true;
 						}
-					} else if (columnIndex == TABLE_QUERY_COLUMN_TIME) {
-						TextView textView = (TextView) view;
-						String relativeTime = null;
-						String time = cursor.getString(columnIndex);
-						if (time != null) {
-							relativeTime = getRelativeTime(
-									VehicleItemViewActivity.this, time);
-						}
-						if (relativeTime == null) {
-							relativeTime = time;
-						}
-						textView.setText(relativeTime);
-						result = true;
 					}
+					// else if (columnIndex == TABLE_QUERY_COLUMN_TIME) {
+					// TextView textView = (TextView) view;
+					// String relativeTime = null;
+					// String time = cursor.getString(columnIndex);
+					// if (time != null) {
+					// relativeTime = getRelativeTime(
+					// VehicleItemViewActivity.this, time);
+					// }
+					// if (relativeTime == null) {
+					// relativeTime = time;
+					// }
+					// textView.setText(relativeTime);
+					// result = true;
+					// }
 					return result;
 				}
 			});

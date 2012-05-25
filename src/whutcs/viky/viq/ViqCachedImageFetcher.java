@@ -41,7 +41,7 @@ public class ViqCachedImageFetcher extends Thread {
 		} else {
 			// create the cache
 			File originalImageFile = getExistingImageFile(mImageName);
-			if (originalImageFile.exists()) {
+			if (originalImageFile != null && originalImageFile.exists()) {
 				Bitmap bitmap = getBitmap(originalImageFile.getPath());
 				try {
 					bitmap.compress(CompressFormat.JPEG, 50,

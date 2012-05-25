@@ -283,8 +283,8 @@ public class VehicleInfoEditActivity extends Activity {
 				Log.v(TAG, "rows updated: " + result);
 
 			} else {
-				result = database.insert(TABLE_INFO, null, values);
-				Log.v(TAG, "row id inserted: " + result);
+				mID = database.insert(TABLE_INFO, null, values);
+				Log.v(TAG, "row id inserted: " + mID);
 
 			}
 			database.close();
