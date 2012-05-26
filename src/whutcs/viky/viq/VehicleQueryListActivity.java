@@ -3,8 +3,9 @@
  */
 package whutcs.viky.viq;
 
-import static whutcs.viky.viq.ViqCommonUtilities.*;
+import static whutcs.viky.viq.ViqCommonUtilities.EXTRA_ID;
 import static whutcs.viky.viq.ViqCommonUtilities.EXTRA_LICENCE;
+import static whutcs.viky.viq.ViqCommonUtilities.getRelativeTime;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.VIEW_QUERY_INFO;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.VIEW_QUERY_INFO_COLUMNS;
@@ -16,6 +17,7 @@ import static whutcs.viky.viq.ViqSQLiteOpenHelper.VIEW_QUERY_INFO_COLUMN_PHOTO;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.VIEW_QUERY_INFO_COLUMN_PLACE;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.VIEW_QUERY_INFO_COLUMN_TIME;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.VIEW_QUERY_INFO_SELECTION;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.getSelectiionArgs;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -29,10 +31,10 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView.AdapterContextMenuInfo;
-import android.widget.SimpleCursorAdapter.ViewBinder;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+import android.widget.SimpleCursorAdapter.ViewBinder;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -66,6 +68,7 @@ public class VehicleQueryListActivity extends ViqBaseShakeableListActivity {
 		super.onCreateContextMenu(menu, v, menuInfo);
 
 		mContextMenuInfo = (AdapterContextMenuInfo) menuInfo;
+		long id = mContextMenuInfo.id;
 
 		int position = mContextMenuInfo.position;
 		Cursor cursor = (Cursor) getListAdapter().getItem(position);
@@ -73,7 +76,7 @@ public class VehicleQueryListActivity extends ViqBaseShakeableListActivity {
 		String time = cursor.getString(VIEW_QUERY_INFO_COLUMN_TIME);
 		String relativeTime = getRelativeTime(this, time);
 
-		menu.setHeaderTitle(licence + ", " + relativeTime);
+		menu.setHeaderTitle(id + " " + licence + ", " + relativeTime);
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.vehicle_query_list_context_menu, menu);
 	}

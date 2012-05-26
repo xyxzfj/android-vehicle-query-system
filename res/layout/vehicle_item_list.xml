@@ -41,6 +41,6 @@
         <Button
             android:id="@+id/new_query"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content" android:text="@string/check_vehicle"/>
     </LinearLayout>
 </LinearLayout>

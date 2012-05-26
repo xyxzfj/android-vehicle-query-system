@@ -1,18 +1,24 @@
 package whutcs.viky.viq;
 
-import static whutcs.viky.viq.ViqCommonUtilities.*;
+import static whutcs.viky.viq.ViqCommonUtilities.EXTRA_ID;
+import static whutcs.viky.viq.ViqCommonUtilities.EXTRA_LICENCE;
+import static whutcs.viky.viq.ViqCommonUtilities.getBitmapByName;
+import static whutcs.viky.viq.ViqCommonUtilities.getRelativeTime;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMNS;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_BIRTH;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_DRIVING_LICENCE;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_GENDER;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_LICENCE;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_NAME;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_NOTE;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_PHONE;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_PHOTO;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_TYPE;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_VIN;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY_COLUMNS;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY_COLUMN_NOTE;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY_COLUMN_PHOTO;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY_COLUMN_PLACE;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY_COLUMN_TIME;
@@ -24,7 +30,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.opengl.Visibility;
 import android.os.Bundle;
 import android.text.ClipboardManager;
 import android.util.Log;
@@ -34,7 +39,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -128,12 +132,14 @@ public class VehicleItemViewActivity extends ViqShakeableListActicity {
 		super.onCreateContextMenu(menu, v, menuInfo);
 
 		mContextMenuInfo = (AdapterContextMenuInfo) menuInfo;
+		long id = mContextMenuInfo.id;
 
 		int position = mContextMenuInfo.position;
 		Cursor cursor = (Cursor) getListAdapter().getItem(position);
 		String time = cursor.getString(TABLE_QUERY_COLUMN_TIME);
+		String relativeTime = getRelativeTime(this, time);
 
-		menu.setHeaderTitle(time);
+		menu.setHeaderTitle(id + " " + relativeTime);
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.vehicle_item_query_list_context_menu, menu);
 	}
@@ -414,21 +420,20 @@ public class VehicleItemViewActivity extends ViqShakeableListActicity {
 							fetchCacher.run();
 							result = true;
 						}
+					} else if (columnIndex == TABLE_QUERY_COLUMN_TIME) {
+						TextView textView = (TextView) view;
+						String relativeTime = null;
+						String time = cursor.getString(columnIndex);
+						if (time != null) {
+							relativeTime = getRelativeTime(
+									VehicleItemViewActivity.this, time);
+						}
+						if (relativeTime == null) {
+							relativeTime = time;
+						}
+						textView.setText(relativeTime);
+						result = true;
 					}
-					// else if (columnIndex == TABLE_QUERY_COLUMN_TIME) {
-					// TextView textView = (TextView) view;
-					// String relativeTime = null;
-					// String time = cursor.getString(columnIndex);
-					// if (time != null) {
-					// relativeTime = getRelativeTime(
-					// VehicleItemViewActivity.this, time);
-					// }
-					// if (relativeTime == null) {
-					// relativeTime = time;
-					// }
-					// textView.setText(relativeTime);
-					// result = true;
-					// }
 					return result;
 				}
 			});

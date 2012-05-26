@@ -31,17 +31,17 @@
     <string name="vehicle_info_list">车辆信息库</string>
     <string name="vehicle_query_list">车辆登记单</string>
     <string name="vehicle_info_list_empty">车辆数据列表为空</string>
-    <string name="vehicle_query_list_empty">车辆查询列表为空</string>
-    <string name="query_method">查询方式</string>
-    <string name="query_method_summary">选择查询方式：拍摄车牌照片（相机），选择车牌照片（图库），输入车牌号</string>
+    <string name="vehicle_query_list_empty">车辆查询/登记列表为空</string>
+    <string name="query_method">车牌号输入方式</string>
+    <string name="query_method_summary">选择车牌号输入方式：拍摄车牌照片（相机），选择车牌照片（图库），手工输入</string>
     <string-array name="entries_query_method">
         <item>拍摄车牌照片</item>
         <item>选择车牌照片</item>
-        <item>输入车牌号</item>
+        <item>手工输入</item>
     </string-array>
     <string name="take_licence_image">拍摄车牌照片</string>
     <string name="select_licence_image">选择车牌照片</string>
-    <string name="input_licence_number">输入车牌号</string>
+    <string name="input_licence_number">手工输入</string>
     <string name="edit_vehicle">编辑车辆</string>
     <string name="view_vehicle">查看车辆</string>
     <string name="preference">首选项</string>
@@ -61,14 +61,14 @@
     <string name="copy_all">复制全部</string>
     <string name="copy_owner_name">复制车主姓名</string>
     <string name="send_vehicle_info">短信发送车辆信息</string>
-    <string name="copy_time">复制查询时间</string>
-    <string name="copy_place">复制查询地点</string>
+    <string name="copy_time">复制登记时间</string>
+    <string name="copy_place">复制登记地点</string>
     <string name="sms_all">短信发送全部</string>
     <string name="copy">复制</string>
     <string name="copy_owner_gender_birth">复制车主姓别、出生年月</string>
     <string name="item_view">查看车辆</string>
     <string name="info_edit">编辑车辆信息</string>
-    <string name="query_edit">编辑查询记录</string>
+    <string name="query_edit">编辑登记记录</string>
     <string name="vehicle_image">车辆图片</string>
     <string name="licence">车牌号</string>
     <string name="type">车型</string>
@@ -85,8 +85,8 @@
     <string name="touch_to_new">触摸更换照片</string>
     <string name="no_cnl">语言包cnl.traineddata不存在！</string>
     <string name="vehicle_query_system">车辆查询系统</string>
-    <string name="add_to_vehicle_info_list">增至车辆数据库</string>
-    <string name="shake_to_query">摇一摇，快速查询车辆信息</string>
+    <string name="add_to_vehicle_info_list">增加至车辆信息库</string>
+    <string name="shake_to_query">摇一摇，快速查询/登记车辆信息</string>
     <string name="shakeable">摇一摇</string>
     <string name="saved">已保存</string>
     <string name="save">保存</string>
@@ -97,5 +97,11 @@
     <string name="edit_vehicle_info">编辑车辆信息</string>
     <string name="edit_vehicle_query">编辑车辆登记</string>
     <string name="palm_vehicle_query_system">掌上车辆查询系统</string>
+    <string name="check_vehicle">查询/登记车辆</string>
+    <string name="input_licence_here">在此直接输入车牌号</string>
+    <string name="check_ok">登记成功，已转至查看车辆</string>
+    <string name="vehicle_info">车辆信息</string>
+    <string name="vehicle_query">车辆登记</string>
+    <string name="send_vehicle_query">短信发送该登记信息</string>
     
 </resources>

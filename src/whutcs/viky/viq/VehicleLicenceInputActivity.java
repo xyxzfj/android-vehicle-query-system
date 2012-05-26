@@ -37,14 +37,25 @@ import static com.googlecode.javacv.cpp.opencv_imgproc.cvMinAreaRect2;
 import static com.googlecode.javacv.cpp.opencv_imgproc.cvSmooth;
 import static com.googlecode.javacv.cpp.opencv_imgproc.cvThreshold;
 import static com.googlecode.javacv.cpp.opencv_imgproc.cvWarpAffine;
+import static whutcs.viky.viq.ViqCommonUtilities.CODE_SELECT_PHOTO;
+import static whutcs.viky.viq.ViqCommonUtilities.CODE_TAKE_PHOTO;
 import static whutcs.viky.viq.ViqCommonUtilities.EXTRA_LICENCE;
-import static whutcs.viky.viq.ViqCommonUtilities.EXTRA_VEHICLE;
 import static whutcs.viky.viq.ViqCommonUtilities.fileCopy;
 import static whutcs.viky.viq.ViqCommonUtilities.getBitmap;
+import static whutcs.viky.viq.ViqCommonUtilities.getDataTimeString;
 import static whutcs.viky.viq.ViqCommonUtilities.getDcimDirectory;
+import static whutcs.viky.viq.ViqCommonUtilities.getGpsString;
 import static whutcs.viky.viq.ViqCommonUtilities.getNewImageFile;
 import static whutcs.viky.viq.ViqCommonUtilities.streamCopy;
-import static whutcs.viky.viq.ViqCommonUtilities.*;
+import static whutcs.viky.viq.ViqCommonUtilities.uriToImagePath;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.SPECIAL_COLUMN_LICENCE;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY_COLUMNS;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY_COLUMN_NOTE;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY_COLUMN_PHOTO;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY_COLUMN_PLACE;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY_COLUMN_TIME;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -53,8 +64,10 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 
 import android.app.Activity;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
@@ -200,44 +213,47 @@ public class VehicleLicenceInputActivity extends Activity {
 	private class OnOkClickListener implements OnClickListener {
 
 		public void onClick(View v) {
+			String datetime = getDataTimeString();
+			String gps = getGpsString(VehicleLicenceInputActivity.this);
+			String note = null;
+
 			String licence = null;
 			if (mLicenceText.getText() != null) {
 				licence = mLicenceText.getText().toString();
 			}
-
 			String vehicle = null;
 			if (mVehicleImageFile != null) {
 				vehicle = mVehicleImageFile.getName();
 			}
 
-			// createQueryRecord(licence, vehicle);
+			ContentValues values = new ContentValues();
+			values.put(TABLE_QUERY_COLUMNS[TABLE_QUERY_COLUMN_TIME], datetime);
+			values.put(TABLE_QUERY_COLUMNS[TABLE_QUERY_COLUMN_PLACE], gps);
+			values.put(TABLE_QUERY_COLUMNS[TABLE_QUERY_COLUMN_NOTE], note);
+			values.put(TABLE_QUERY_COLUMNS[TABLE_QUERY_COLUMN_PHOTO], vehicle);
+			values.put(SPECIAL_COLUMN_LICENCE, licence);
 
+			ViqSQLiteOpenHelper helper = new ViqSQLiteOpenHelper(
+					VehicleLicenceInputActivity.this);
+			SQLiteDatabase database = helper.getWritableDatabase();
+			long rowid = database.insert(TABLE_QUERY, null, values);
+			Log.v(TAG, "rowid: " + rowid);
+			database.close();
+			helper.close();
+
+			Toast.makeText(VehicleLicenceInputActivity.this,
+					getString(R.string.check_ok), Toast.LENGTH_SHORT).show();
+
+			// startActivity(new Intent(VehicleLicenceInputActivity.this,
+			// VehicleQueryEditActivity.class).putExtra(EXTRA_LICENCE,
+			// licence).putExtra(EXTRA_VEHICLE, vehicle));
 			startActivity(new Intent(VehicleLicenceInputActivity.this,
-					VehicleQueryEditActivity.class).putExtra(EXTRA_LICENCE,
-					licence).putExtra(EXTRA_VEHICLE, vehicle));
+					VehicleItemViewActivity.class).putExtra(EXTRA_LICENCE,
+					licence));
 
 			finish();
 		}
 	}
-
-	// private void createQueryRecord(String licence, String vehicle) {
-	// String datetime = getDataTimeString();
-	// String gps = getGpsString(this);
-	//
-	// ContentValues values = new ContentValues();
-	// values.put(TABLE_QUERY_COLUMNS[TABLE_QUERY_COLUMN_TIME], datetime);
-	// values.put(TABLE_QUERY_COLUMNS[TABLE_QUERY_COLUMN_PLACE], gps);
-	// values.put(TABLE_QUERY_COLUMNS[TABLE_QUERY_COLUMN_NOTE], "");
-	// values.put(TABLE_QUERY_COLUMNS[TABLE_QUERY_COLUMN_PHOTO], vehicle);
-	// values.put(SPECIAL_COLUMN_LICENCE, licence);
-	//
-	// ViqSQLiteOpenHelper helper = new ViqSQLiteOpenHelper(this);
-	// SQLiteDatabase database = helper.getWritableDatabase();
-	// long rowid = database.insert(TABLE_QUERY, null, values);
-	// Log.v(TAG, "rowid: " + rowid);
-	// database.close();
-	// helper.close();
-	// }
 
 	private class OnCancelClickListener implements OnClickListener {
 
@@ -817,4 +833,5 @@ public class VehicleLicenceInputActivity extends Activity {
 		}
 
 	}
+
 }

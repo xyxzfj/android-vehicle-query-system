@@ -1,6 +1,6 @@
 package whutcs.viky.viq;
 
-import static whutcs.viky.viq.ViqCommonUtilities.EXTRA_ID;
+import static whutcs.viky.viq.ViqCommonUtilities.*;
 import static whutcs.viky.viq.ViqCommonUtilities.EXTRA_LICENCE;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMNS;
@@ -15,8 +15,6 @@ import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_PHOTO;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_TYPE;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_VIN;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_SELECTION;
-import static whutcs.viky.viq.ViqSQLiteOpenHelper.getSelectiionArgs;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -71,12 +69,13 @@ public class VehicleInfoListActivity extends ViqBaseShakeableListActivity {
 		super.onCreateContextMenu(menu, v, menuInfo);
 
 		mContextMenuInfo = (AdapterContextMenuInfo) menuInfo;
+		long id = mContextMenuInfo.id;
 
 		int position = mContextMenuInfo.position;
 		Cursor cursor = (Cursor) getListAdapter().getItem(position);
 		String licence = cursor.getString(TABLE_INFO_COLUMN_LICENCE);
 
-		menu.setHeaderTitle(licence);
+		menu.setHeaderTitle(id + " " + licence);
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.vehicle_info_list_context_menu, menu);
 

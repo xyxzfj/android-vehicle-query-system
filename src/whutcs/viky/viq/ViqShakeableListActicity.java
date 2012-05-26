@@ -1,5 +1,6 @@
 package whutcs.viky.viq;
 
+import static whutcs.viky.viq.ViqCommonUtilities.updateGpsLocation;
 import android.app.ListActivity;
 import android.app.Service;
 import android.content.Intent;
@@ -34,6 +35,8 @@ public abstract class ViqShakeableListActicity extends ListActivity implements
 		super.onCreate(savedInstanceState);
 		mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 		mVibrator = (Vibrator) getSystemService(Service.VIBRATOR_SERVICE);
+
+		updateGpsLocation(this);
 	}
 
 	@Override

@@ -1,6 +1,5 @@
 package whutcs.viky.viq;
 
-import android.R.integer;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -107,7 +106,6 @@ public abstract class ViqBaseShakeableListActivity extends
 
 		refreshListView();
 
-		refreshNewQueryButtonText();
 	}
 
 	@Override
@@ -250,16 +248,6 @@ public abstract class ViqBaseShakeableListActivity extends
 		// startActivity(new Intent(this,
 		// VehicleItemViewActivity.class).putExtra(
 		// EXTRA_LICENCE, licence));
-	}
-
-	/**
-	 * Refresh the text of the new query button according the preference
-	 * "query method".
-	 */
-	protected void refreshNewQueryButtonText() {
-		String queryMethod = ViqPreferenceActivity.getQueryMethod(this);
-		mNewQueryButton.setText(queryMethod);
-
 	}
 
 	protected void toggleQuickSearchMode() {

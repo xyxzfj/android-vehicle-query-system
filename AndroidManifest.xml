@@ -32,22 +32,22 @@
         </activity><activity
             android:name=".VehicleLicenceInputActivity"
             android:icon="@drawable/camera"
-            android:label="@string/licence_input"
+            android:label="@string/check_vehicle"
             android:screenOrientation="portrait" >
         </activity>
         <activity
             android:name=".VehicleItemViewActivity"
-            android:label="@string/item_view" android:theme="@android:style/Theme.NoTitleBar">
+            android:label="@string/item_view">
         </activity>
         
         
         <activity
             android:name=".VehicleInfoEditActivity"
-            android:label="@string/edit_vehicle_info" >
+            android:label="@string/vehicle_info" >
         </activity>
         <activity
             android:name=".VehicleQueryEditActivity"
-            android:label="@string/edit_vehicle_query" >
+            android:label="@string/vehicle_query" >
         </activity><activity android:name=".ViqPreferenceActivity" android:label="@string/preference">
         </activity>
     </application>

@@ -1,14 +1,16 @@
 package whutcs.viky.viq;
 
-import static whutcs.viky.viq.ViqCommonUtilities.*;
+import static whutcs.viky.viq.ViqCommonUtilities.CODE_SELECT_PHOTO;
+import static whutcs.viky.viq.ViqCommonUtilities.EXTRA_ID;
 import static whutcs.viky.viq.ViqCommonUtilities.EXTRA_LICENCE;
 import static whutcs.viky.viq.ViqCommonUtilities.EXTRA_VEHICLE;
+import static whutcs.viky.viq.ViqCommonUtilities.fileCopy;
 import static whutcs.viky.viq.ViqCommonUtilities.getBitmapByName;
 import static whutcs.viky.viq.ViqCommonUtilities.getDataTimeString;
 import static whutcs.viky.viq.ViqCommonUtilities.getGpsString;
 import static whutcs.viky.viq.ViqCommonUtilities.getNewImageFile;
+import static whutcs.viky.viq.ViqCommonUtilities.uriToImagePath;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.SPECIAL_COLUMN_LICENCE;
-import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_NOTE;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY_COLUMNS;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY_COLUMN_LICENCE;
@@ -28,7 +30,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
