@@ -1,13 +1,17 @@
 package whutcs.viky.viq;
 
-import static whutcs.viky.viq.ViqCommonUtilities.updateGpsLocation;
 import android.app.ListActivity;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.location.LocationProvider;
 import android.os.Bundle;
 import android.os.Vibrator;
 
@@ -19,7 +23,7 @@ import android.os.Vibrator;
  */
 
 public abstract class ViqShakeableListActicity extends ListActivity implements
-		SensorEventListener {
+		SensorEventListener, LocationListener {
 	// private static final String TAG = "VehicleBaseListActicity";
 
 	private SensorManager mSensorManager;
@@ -37,6 +41,31 @@ public abstract class ViqShakeableListActicity extends ListActivity implements
 		mVibrator = (Vibrator) getSystemService(Service.VIBRATOR_SERVICE);
 
 		updateGpsLocation(this);
+	}
+
+	/**
+	 * Update GPS location for later getting the latest location.
+	 * 
+	 * @param context
+	 */
+	private void updateGpsLocation(Context context) {
+		// update location
+		LocationManager locationManager = (LocationManager) context
+				.getSystemService(Context.LOCATION_SERVICE);
+		LocationProvider gpsProvider = locationManager
+				.getProvider(LocationManager.GPS_PROVIDER);
+		if (gpsProvider != null) {
+			String providerName = gpsProvider.getName();
+			locationManager.requestLocationUpdates(providerName, 1000, 5, this);
+			try {
+				locationManager.requestLocationUpdates(
+						LocationManager.NETWORK_PROVIDER, 1000, 5, this);
+			} catch (RuntimeException e) {
+				// If anything at all goes wrong with getting a cell location do
+				// not abort. Cell location is not essential to this app.
+			}
+		}
+
 	}
 
 	@Override
@@ -77,6 +106,26 @@ public abstract class ViqShakeableListActicity extends ListActivity implements
 			}
 
 		}
+	}
+
+	public void onLocationChanged(Location location) {
+		// TODO Auto-generated method stub
+
+	}
+
+	public void onProviderDisabled(String provider) {
+		// TODO Auto-generated method stub
+
+	}
+
+	public void onProviderEnabled(String provider) {
+		// TODO Auto-generated method stub
+
+	}
+
+	public void onStatusChanged(String provider, int status, Bundle extras) {
+		// TODO Auto-generated method stub
+
 	}
 
 }

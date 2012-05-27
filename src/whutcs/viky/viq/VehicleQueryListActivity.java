@@ -39,7 +39,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 /**
- * Show a list of historical queries, including the vehicle image taken or
+ * Shows a list of historical queries, including the vehicle image taken or
  * selected, the licence , the owner's name and phone if can be retrieved from
  * the database, and the time and place the query happens.</br> The implemention
  * of this class is similar to VehicleInfoListActivity.

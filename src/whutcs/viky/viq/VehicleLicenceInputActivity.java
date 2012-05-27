@@ -103,8 +103,8 @@ import com.googlecode.leptonica.android.ReadFile;
 import com.googlecode.tesseract.android.TessBaseAPI;
 
 /**
- * Input a licence (number) -- either by recognizing from a vehicle image, or by
- * hand typed in, or both (in which the later is a corcharRecting process). A
+ * Inputs a licence (number) -- either by recognizing from a vehicle image, or
+ * by hand typed in, or both (in which the later is a corcharRecting process). A
  * vehicle image can be either from the camera or from the gallary.
  * 
  * @author xyxzfj@gmail.com
@@ -114,7 +114,7 @@ public class VehicleLicenceInputActivity extends Activity {
 	private static final String TAG = "VehicleLicenceInputActivity";
 
 	// TODO: set false when publishing
-	private static final boolean SAVE_IMG = true;
+	private static final boolean SAVE_IMG = false;
 
 	public static final String SAVE_IMAGE_PATH = getDcimDirectory("viq_save")
 			.getPath() + File.separator;

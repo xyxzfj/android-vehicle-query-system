@@ -41,7 +41,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 /**
- * Update or create a mVehicle query record.
+ * Updates or creates a mVehicle query record.
  * 
  * @author xyxzfj@gmail.com
  * 
@@ -226,15 +226,14 @@ public class VehicleQueryEditActivity extends Activity {
 			SQLiteOpenHelper helper = new ViqSQLiteOpenHelper(this);
 			SQLiteDatabase database = helper.getWritableDatabase();
 
-			long result;
 			if (mID != 0) {
-				result = database.update(TABLE_QUERY, values, "_id=?",
+				long result = database.update(TABLE_QUERY, values, "_id=?",
 						new String[] { Long.toString(mID) });
 				Log.v(TAG, "rows updated: " + result);
 
 			} else {
-				result = database.insert(TABLE_QUERY, null, values);
-				Log.v(TAG, "row id inserted: " + result);
+				mID = database.insert(TABLE_QUERY, null, values);
+				Log.v(TAG, "row id inserted: " + mID);
 
 			}
 			database.close();

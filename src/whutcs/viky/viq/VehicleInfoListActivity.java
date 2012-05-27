@@ -1,6 +1,6 @@
 package whutcs.viky.viq;
 
-import static whutcs.viky.viq.ViqCommonUtilities.*;
+import static whutcs.viky.viq.ViqCommonUtilities.EXTRA_ID;
 import static whutcs.viky.viq.ViqCommonUtilities.EXTRA_LICENCE;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMNS;
@@ -15,6 +15,8 @@ import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_PHOTO;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_TYPE;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_VIN;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_SELECTION;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.getSelectiionArgs;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -41,9 +43,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 /**
- * Show a list of vehicle info (info of the vehicle itself and its owner) items,
- * including the vehicle's image, licence, type, vin, the owner's name, phone,
- * gender, birth, driving licence, and the note.
+ * Shows a list of vehicle info (info of the vehicle itself and its owner)
+ * items, including the vehicle's image, licence, type, vin, the owner's name,
+ * phone, gender, birth, driving licence, and the note.
  * 
  * @author xyxzfj@gmail.com
  * 

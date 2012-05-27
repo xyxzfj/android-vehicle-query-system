@@ -1,6 +1,25 @@
 package whutcs.viky.viq;
 
-import static whutcs.viky.viq.ViqCommonUtilities.*;
+import static whutcs.viky.viq.ViqCommonUtilities.CODE_SELECT_PHOTO;
+import static whutcs.viky.viq.ViqCommonUtilities.EXTRA_ID;
+import static whutcs.viky.viq.ViqCommonUtilities.EXTRA_LICENCE;
+import static whutcs.viky.viq.ViqCommonUtilities.EXTRA_VEHICLE;
+import static whutcs.viky.viq.ViqCommonUtilities.fileCopy;
+import static whutcs.viky.viq.ViqCommonUtilities.getBitmapByName;
+import static whutcs.viky.viq.ViqCommonUtilities.getNewImageFile;
+import static whutcs.viky.viq.ViqCommonUtilities.uriToImagePath;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMNS;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_BIRTH;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_DRIVING_LICENCE;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_GENDER;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_LICENCE;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_NAME;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_NOTE;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_PHONE;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_PHOTO;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_TYPE;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_VIN;
 
 import java.io.File;
 
@@ -25,7 +44,7 @@ import android.widget.RadioButton;
 import android.widget.Toast;
 
 /**
- * Update or create a mVehicle info record.
+ * Updates or creates a mVehicle info record.
  * 
  * @author xyxzfj@gmail.com
  * 
@@ -276,9 +295,8 @@ public class VehicleInfoEditActivity extends Activity {
 			SQLiteOpenHelper helper = new ViqSQLiteOpenHelper(this);
 			SQLiteDatabase database = helper.getWritableDatabase();
 
-			long result;
 			if (mID != 0) {
-				result = database.update(TABLE_INFO, values, "_id=?",
+				long result = database.update(TABLE_INFO, values, "_id=?",
 						new String[] { Long.toString(mID) });
 				Log.v(TAG, "rows updated: " + result);
 

@@ -18,7 +18,6 @@ import android.graphics.BitmapFactory;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
-import android.location.LocationProvider;
 import android.net.Uri;
 import android.os.Environment;
 import android.text.format.DateUtils;
@@ -133,37 +132,14 @@ public class ViqCommonUtilities extends ViqSQLiteOpenHelper {
 		return relativeTime;
 	}
 
-	/**
-	 * Update GPS location for later getting the latest location.
-	 * 
-	 * @param context
-	 */
-	public static void updateGpsLocation(Context context) {
-		// update location
-		LocationManager locationManager = (LocationManager) context
-				.getSystemService(Context.LOCATION_SERVICE);
-		LocationProvider gpsProvider = locationManager
-				.getProvider(LocationManager.GPS_PROVIDER);
-		if (gpsProvider != null) {
-			String providerName = gpsProvider.getName();
-			locationManager.requestSingleUpdate(providerName, null);
-			try {
-				locationManager.requestSingleUpdate(
-						LocationManager.NETWORK_PROVIDER, null);
-			} catch (RuntimeException e) {
-				// If anything at all goes wrong with getting a cell location do
-				// not abort. Cell location is not essential to this app.
-			}
-		}
-
-	}
-
 	public static String getGpsString(Context context) {
 		if (context == null) {
 			return null;
 		}
 
 		String gps = null;
+
+		Location location = null;
 
 		Criteria criteria = new Criteria();
 		criteria.setAccuracy(Criteria.ACCURACY_FINE);
@@ -174,7 +150,9 @@ public class ViqCommonUtilities extends ViqSQLiteOpenHelper {
 		LocationManager locationManager = (LocationManager) context
 				.getSystemService(Context.LOCATION_SERVICE);
 		String provider = locationManager.getBestProvider(criteria, true);
-		Location location = locationManager.getLastKnownLocation(provider);
+		if (provider != null) {
+			location = locationManager.getLastKnownLocation(provider);
+		}
 
 		// Location location = null;
 		//
@@ -199,10 +177,11 @@ public class ViqCommonUtilities extends ViqSQLiteOpenHelper {
 			double longtitude = location.getLongitude();
 			double latitude = location.getLatitude();
 			gps = "Lon:" + longtitude + "; Lat:" + latitude;
-		} else {
-			gps = "Lon:0; Lat:0";
 		}
 
+		if (gps == null) {
+			gps = "Lon:0; Lat:0";
+		}
 		return gps;
 	}
 

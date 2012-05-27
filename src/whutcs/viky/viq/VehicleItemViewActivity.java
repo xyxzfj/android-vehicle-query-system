@@ -48,8 +48,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 /**
- * Query the database with the given row id or licence number, show the mVehicle
- * information and its check records.
+ * Queries the database with the given row id or licence number, shows the
+ * mVehicle information and its check records.
  * 
  * @author xyxzfj@gmail.com
  * 

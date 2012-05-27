@@ -11,7 +11,7 @@
         android:layout_gravity="center"
         android:contentDescription="@string/extracted_licence_image"
         android:maxHeight="100dp" />
-
+
     <EditText
         android:id="@+id/licence"
         android:layout_width="match_parent"
@@ -33,18 +33,19 @@
         android:layout_height="wrap_content" >
 
         <Button
+            android:id="@+id/query_ok"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/ok" />
+
+        <Button
             android:id="@+id/query_cancel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/cancel" />
 
-        <Button
-            android:id="@+id/query_ok"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/ok" />
     </LinearLayout>
 
 </LinearLayout>
