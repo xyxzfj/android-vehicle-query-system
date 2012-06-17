@@ -17,7 +17,7 @@ import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_PHOTO;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_TYPE;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_INFO_COLUMN_VIN;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY;
-import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY_COLUMNS;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY_COLUMNS_SELECTED;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY_COLUMN_NOTE;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY_COLUMN_PHOTO;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY_COLUMN_PLACE;
@@ -139,7 +139,7 @@ public class VehicleItemViewActivity extends ViqShakeableListActicity {
 		String time = cursor.getString(TABLE_QUERY_COLUMN_TIME);
 		String relativeTime = getRelativeTime(this, time);
 
-		menu.setHeaderTitle(id + " " + relativeTime);
+		menu.setHeaderTitle(id + ". " + relativeTime);
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.vehicle_item_query_list_context_menu, menu);
 	}
@@ -397,15 +397,16 @@ public class VehicleItemViewActivity extends ViqShakeableListActicity {
 
 		SQLiteDatabase database = mHelper.getReadableDatabase();
 		// Get the cursor.
-		cursor = database.query(TABLE_QUERY, TABLE_QUERY_COLUMNS, "_licence=?",
-				new String[] { mLicence }, null, null, "_id DESC");
+		cursor = database.query(TABLE_QUERY, TABLE_QUERY_COLUMNS_SELECTED,
+				"_licence_=?", new String[] { mLicence }, null, null,
+				"_id DESC");
 		// Bind or rebind the cursor to the list adapter.
 		SimpleCursorAdapter adapter = (SimpleCursorAdapter) getListAdapter();
 		if (adapter == null) {
 			adapter = new SimpleCursorAdapter(this,
 					R.layout.vehicle_item_query_list_item, cursor,
-					TABLE_QUERY_COLUMNS, new int[] { R.id.rowid, R.id.time,
-							R.id.place, R.id.note, R.id.vehicle });
+					TABLE_QUERY_COLUMNS_SELECTED, new int[] { R.id.rowid,
+							R.id.time, R.id.place, R.id.note, R.id.vehicle });
 			adapter.setViewBinder(new ViewBinder() {
 				public boolean setViewValue(View view, Cursor cursor,
 						int columnIndex) {

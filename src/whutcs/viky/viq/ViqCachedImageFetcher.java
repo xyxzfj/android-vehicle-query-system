@@ -1,6 +1,8 @@
 package whutcs.viky.viq;
 
-import static whutcs.viky.viq.ViqCommonUtilities.*;
+import static whutcs.viky.viq.ViqCommonUtilities.getBitmap;
+import static whutcs.viky.viq.ViqCommonUtilities.getDcimDirectory;
+import static whutcs.viky.viq.ViqCommonUtilities.getExistingImageFile;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -33,13 +35,14 @@ public class ViqCachedImageFetcher extends Thread {
 		super.run();
 
 		BitmapDrawable drawable = null;
+
 		String cachedImagePath = CACHE_PATH + mImageName;
 		File cachedImageFile = new File(cachedImagePath);
 		if (cachedImageFile.exists()) {
 			// read the cache
 			drawable = new BitmapDrawable(cachedImagePath);
 		} else {
-			// create the cache
+			// create and read the cache
 			File originalImageFile = getExistingImageFile(mImageName);
 			if (originalImageFile != null && originalImageFile.exists()) {
 				Bitmap bitmap = getBitmap(originalImageFile.getPath());

@@ -48,9 +48,9 @@ import static whutcs.viky.viq.ViqCommonUtilities.getGpsString;
 import static whutcs.viky.viq.ViqCommonUtilities.getNewImageFile;
 import static whutcs.viky.viq.ViqCommonUtilities.streamCopy;
 import static whutcs.viky.viq.ViqCommonUtilities.uriToImagePath;
-import static whutcs.viky.viq.ViqSQLiteOpenHelper.SPECIAL_COLUMN_LICENCE;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY_COLUMNS;
+import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY_COLUMN_LICENCE;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY_COLUMN_NOTE;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY_COLUMN_PHOTO;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY_COLUMN_PLACE;
@@ -231,7 +231,7 @@ public class VehicleLicenceInputActivity extends Activity {
 			values.put(TABLE_QUERY_COLUMNS[TABLE_QUERY_COLUMN_PLACE], gps);
 			values.put(TABLE_QUERY_COLUMNS[TABLE_QUERY_COLUMN_NOTE], note);
 			values.put(TABLE_QUERY_COLUMNS[TABLE_QUERY_COLUMN_PHOTO], vehicle);
-			values.put(SPECIAL_COLUMN_LICENCE, licence);
+			values.put(TABLE_QUERY_COLUMNS[TABLE_QUERY_COLUMN_LICENCE], licence);
 
 			ViqSQLiteOpenHelper helper = new ViqSQLiteOpenHelper(
 					VehicleLicenceInputActivity.this);

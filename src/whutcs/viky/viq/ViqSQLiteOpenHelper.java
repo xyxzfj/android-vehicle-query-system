@@ -3,7 +3,6 @@ package whutcs.viky.viq;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 /**
  * Provides access to the underlying database elements -- tables, views and
@@ -20,34 +19,26 @@ public class ViqSQLiteOpenHelper extends SQLiteOpenHelper {
 	public static final String TABLE_QUERY = "Query";
 	public static final String TABLE_INFO = "Info";
 	public static final String VIEW_QUERY_INFO = "QueryInfo";
-	public static final int DB_VERSION = 19;
+	public static final int DB_VERSION = 20;
 
 	// TABLE QUERY:
-	/**
-	 * Outer-seen Columns of table Query; "_licence" as a special column of
-	 * table Query, not seen out of this class.
-	 */
+	public static final String[] TABLE_QUERY_COLUMNS_SELECTED = new String[] {
+			"_id", "time", "place", "note", "photo" };
+	public static final String TABLE_QUERY_SELECTION = getSelection(TABLE_QUERY_COLUMNS_SELECTED);
+	// column "_licence_" is never SELECTed in selection clause.
 	public static final String[] TABLE_QUERY_COLUMNS = new String[] { "_id",
-			"time", "place", "note", "photo" };
+			"time", "place", "note", "photo", "_licence_" };
 	public static final int TABLE_QUERY_COLUMN_TIME = 1;
 	public static final int TABLE_QUERY_COLUMN_PLACE = 2;
 	public static final int TABLE_QUERY_COLUMN_NOTE = 3;
 	public static final int TABLE_QUERY_COLUMN_PHOTO = 4;
 	public static final int TABLE_QUERY_COLUMN_LICENCE = 5;
-	public static final String SPECIAL_COLUMN_LICENCE = "_licence";
-	public static final String TABLE_QUERY_SELECTION = getSelection(TABLE_QUERY_COLUMNS);
-
-	public static final String[] getTableQuerySelectionArgs(String filter) {
-		return getSelectiionArgs(filter, TABLE_QUERY_COLUMNS);
-	}
 
 	// TABLE INFO:
-	/**
-	 * All columns of table Info.
-	 */
 	public static final String[] TABLE_INFO_COLUMNS = new String[] { "_id",
 			"licence", "type", "vin", "name", "phone", "gender", "birth",
 			"driving_licence", "note", "photo" };
+	public static final String TABLE_INFO_SELECTION = getSelection(TABLE_INFO_COLUMNS);
 	public static final int TABLE_INFO_COLUMN_LICENCE = 1;
 	public static final int TABLE_INFO_COLUMN_TYPE = 2;
 	public static final int TABLE_INFO_COLUMN_VIN = 3;
@@ -58,14 +49,11 @@ public class ViqSQLiteOpenHelper extends SQLiteOpenHelper {
 	public static final int TABLE_INFO_COLUMN_DRIVING_LICENCE = 8;
 	public static final int TABLE_INFO_COLUMN_NOTE = 9;
 	public static final int TABLE_INFO_COLUMN_PHOTO = 10;
-	public static final String TABLE_INFO_SELECTION = getSelection(TABLE_INFO_COLUMNS);
 
 	// VIEW QUERY_INFO:
-	/**
-	 * All columns of view QueryInfo.
-	 */
 	public static final String[] VIEW_QUERY_INFO_COLUMNS = new String[] {
 			"_id", "licence", "name", "phone", "time", "place", "note", "photo" };
+	public static final String VIEW_QUERY_INFO_SELECTION = getSelection(VIEW_QUERY_INFO_COLUMNS);
 	public static final int VIEW_QUERY_INFO_COLUMN_LICENCE = 1;
 	public static final int VIEW_QUERY_INFO_COLUMN_NAME = 2;
 	public static final int VIEW_QUERY_INFO_COLUMN_PHONE = 3;
@@ -73,68 +61,57 @@ public class ViqSQLiteOpenHelper extends SQLiteOpenHelper {
 	public static final int VIEW_QUERY_INFO_COLUMN_PLACE = 5;
 	public static final int VIEW_QUERY_INFO_COLUMN_NOTE = 6;
 	public static final int VIEW_QUERY_INFO_COLUMN_PHOTO = 7;
-	public static final String VIEW_QUERY_INFO_SELECTION = getSelection(VIEW_QUERY_INFO_COLUMNS);
 
 	// Creation sql of tables and views.
 	/**
-	 * The _licence field in table Query serves as a reference to table Info.
+	 * The _licence_ field in table Query serves as a reference to table Info.
 	 */
 	public static final String SQL_CREATE_TABLE_QUERY = genCreateTableSql(
-			TABLE_QUERY, TABLE_QUERY_COLUMNS, SPECIAL_COLUMN_LICENCE);
+			TABLE_QUERY, TABLE_QUERY_COLUMNS);
 	public static final String SQL_CREATE_TABLE_INFO = genCreateTableSql(
-			TABLE_INFO, TABLE_INFO_COLUMNS, null);
-	public static final String SQL_CREATE_VIEW_QUERY_INFO = "CREATE VIEW QueryInfo AS SELECT Query._id AS _id, _licence AS licence,name,phone,time,place,Query.note AS note,Query.photo AS photo FROM Query LEFT OUTER JOIN Info ON _licence=licence";
+			TABLE_INFO, TABLE_INFO_COLUMNS);
+	public static final String SQL_CREATE_VIEW_QUERY_INFO = "CREATE VIEW QueryInfo "
+			+ "AS SELECT Query._id AS _id, _licence_ AS licence,name,phone,time,place,Query.note AS note,Query.photo AS photo "
+			+ "FROM Query LEFT OUTER JOIN Info ON _licence_=licence";
 
-	/**
-	 * Generate a sql of table creation.
-	 * 
-	 * @param tableName
-	 *            the name of the table.
-	 * @param specialColumn
-	 *            the special column not included in columnsWithIDFirst, for
-	 *            example column only for JOIN and never used after SELECT. Null
-	 *            if no such a column.
-	 * @param columnsWithIDFirst
-	 *            a string array of columns with "_id" the zero place.
-	 * @return the creation sql.
-	 */
 	private static String genCreateTableSql(String tableName,
-			String[] columnsWithIDFirst, String specialColumn) {
-		if (columnsWithIDFirst.length < 1
+			String[] columnsWithIDFirst) {
+		if (tableName == null || tableName.length() == 0
+				|| columnsWithIDFirst.length == 0
 				|| !columnsWithIDFirst[0].equals("_id")) {
-			Log.e(TAG, "columnsWithIDFirst Error!");
 			return null;
 		}
 
 		StringBuilder sqlBuilder = new StringBuilder();
 		sqlBuilder.append("CREATE TABLE ").append(tableName).append("(");
-		sqlBuilder.append(columnsWithIDFirst[0]).append(
-				" INTEGER PRIMARY KEY AUTOINCREMENT");
+		sqlBuilder.append("_id INTEGER PRIMARY KEY AUTOINCREMENT");
 		for (int i = 1; i < columnsWithIDFirst.length; i++) {
 			sqlBuilder.append(",").append(columnsWithIDFirst[i]);
 		}
-		if (specialColumn != null) {
-			sqlBuilder.append(",").append(specialColumn);
-		}
-
 		sqlBuilder.append(")");
+
 		return sqlBuilder.toString();
 	}
 
 	/**
 	 * Generate a selection clause of OR with all columns " LIKE %?% ".
 	 * 
-	 * @param tableInfoColumnsConcerned
+	 * @param columns
 	 * @return
 	 */
-	private static String getSelection(String[] columnsWithIDFirst) {
+	private static String getSelection(String[] columns) {
+		if (columns.length == 0) {
+			return null;
+		}
+
 		StringBuilder builder = new StringBuilder("(");
-		for (int i = 0; i < columnsWithIDFirst.length - 1; i++) {
-			builder.append(columnsWithIDFirst[i]);
+		for (int i = 0; i < columns.length - 1; i++) {
+			builder.append(columns[i]);
 			builder.append(" LIKE ? OR ");
 		}
-		builder.append(columnsWithIDFirst[columnsWithIDFirst.length - 1]);
+		builder.append(columns[columns.length - 1]);
 		builder.append(" LIKE ?)");
+
 		return builder.toString();
 	}
 
@@ -144,12 +121,16 @@ public class ViqSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * @param filter
 	 * @return selectionArgs
 	 */
-	public static String[] getSelectiionArgs(String filter,
-			String[] columnsWithIDFirst) {
-		String[] selectionArgs = new String[columnsWithIDFirst.length];
+	public static String[] getSelectiionArgs(String filter, int columns) {
+		if (columns == 0) {
+			return null;
+		}
+
+		String[] selectionArgs = new String[columns];
 		for (int i = 0; i < selectionArgs.length; i++) {
 			selectionArgs[i] = "%" + filter + "%";
 		}
+
 		return selectionArgs;
 	}
 

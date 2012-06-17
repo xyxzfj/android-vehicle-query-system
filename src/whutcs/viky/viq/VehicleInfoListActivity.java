@@ -77,7 +77,7 @@ public class VehicleInfoListActivity extends ViqBaseShakeableListActivity {
 		Cursor cursor = (Cursor) getListAdapter().getItem(position);
 		String licence = cursor.getString(TABLE_INFO_COLUMN_LICENCE);
 
-		menu.setHeaderTitle(id + " " + licence);
+		menu.setHeaderTitle(id + ". " + licence);
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.vehicle_info_list_context_menu, menu);
 
@@ -200,6 +200,7 @@ public class VehicleInfoListActivity extends ViqBaseShakeableListActivity {
 		super.refreshListView();
 
 		String filter = getFilter();
+
 		// Should never be closed explicitly until onDestroy().
 		Cursor cursor;
 
@@ -210,7 +211,7 @@ public class VehicleInfoListActivity extends ViqBaseShakeableListActivity {
 					null, null, TABLE_INFO_COLUMNS[TABLE_INFO_COLUMN_LICENCE]);
 		} else {
 			String[] selectionArgs = getSelectiionArgs(getFilter(),
-					TABLE_INFO_COLUMNS);
+					TABLE_INFO_COLUMNS.length);
 			cursor = database.query(TABLE_INFO, TABLE_INFO_COLUMNS,
 					TABLE_INFO_SELECTION, selectionArgs, null, null,
 					TABLE_INFO_COLUMNS[TABLE_INFO_COLUMN_LICENCE]);

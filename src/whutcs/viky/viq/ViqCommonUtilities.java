@@ -24,38 +24,42 @@ import android.text.format.DateUtils;
 import android.util.Log;
 
 /**
- * Provides access to common constants and methods of this app. Extends
- * ViqSQLiteOpenHelper only to use its constants directly.
+ * Provides access to common constants and methods of this app.
  * 
  * @author xyxzfj@gmail.com
  * 
  */
 public class ViqCommonUtilities extends ViqSQLiteOpenHelper {
-	private static final String TAG = "ViqCommonUtility";
-
-	public ViqCommonUtilities(Context context) {
-		super(context);
-	}
+	private static final String TAG = "ViqCommonUtilities";
 
 	public static final String APP_NAME = "AndroidVIQ";
+
 	/**
 	 * The dcimDirectory in /sdcard/DCIM to save taken vehicle images.
 	 */
 	public static final File DIRECTORY_VIQ = getDcimDirectory(APP_NAME);
 
-	public static final String EXTRA_ID = "_id";
+	public static final String EXTRA_ID = "id";
 	public static final String EXTRA_LICENCE = "licenee";
 	public static final String EXTRA_VEHICLE = "vehicle";
 
 	public static final int CODE_TAKE_PHOTO = 0;
 	public static final int CODE_SELECT_PHOTO = 1;
 
+	public ViqCommonUtilities(Context context) {
+		super(context);
+	}
+
 	public static void streamCopy(InputStream is, OutputStream os)
 			throws IOException {
+		if (is == null || os == null) {
+			return;
+		}
+
 		byte[] buffer = new byte[1024];
-		int read;
-		while ((read = is.read(buffer)) > 0) {
-			os.write(buffer, 0, read);
+		int len;
+		while ((len = is.read(buffer)) > 0) {
+			os.write(buffer, 0, len);
 		}
 	}
 
@@ -65,9 +69,8 @@ public class ViqCommonUtilities extends ViqSQLiteOpenHelper {
 		}
 
 		boolean result;
-		InputStream iStream;
 		try {
-			iStream = new FileInputStream(srcFile);
+			InputStream iStream = new FileInputStream(srcFile);
 			OutputStream oStream = new FileOutputStream(objFile);
 			streamCopy(iStream, oStream);
 			iStream.close();
@@ -81,10 +84,29 @@ public class ViqCommonUtilities extends ViqSQLiteOpenHelper {
 	}
 
 	/**
-	 * Get the date time string as a file name.
+	 * Get the corresponding file of the dcimDirectory /sdcard/DCIM/name. Will
+	 * create the dcimDirectory if is doesn't exist.
 	 * 
-	 * @return a unique file name not including the extended name.
+	 * @param dirName
+	 *            the dcimDirectory dirName.
+	 * @return the dcimDirectory's corresponding file.
 	 */
+	public static File getDcimDirectory(String dirName) {
+		if (dirName == null) {
+			return null;
+		}
+
+		File dcimDirectory = null;
+		String dcimPath = Environment.getExternalStoragePublicDirectory(
+				Environment.DIRECTORY_DCIM).getPath();
+		dcimDirectory = new File(dcimPath, dirName);
+		if (!dcimDirectory.exists()) {
+			dcimDirectory.mkdirs();
+		}
+
+		return dcimDirectory;
+	}
+
 	public static String getDateTimeAsImageName() {
 		SimpleDateFormat fileNameFormat = new SimpleDateFormat(
 				"yyyy-MM-dd_HH-mm-ss");
@@ -101,13 +123,13 @@ public class ViqCommonUtilities extends ViqSQLiteOpenHelper {
 
 	public static String getRelativeTime(Context context, String time) {
 		if (time == null) {
-			return null;
+			time = getDataTimeString();
 		}
 
 		String relativeTime = null;
 
-		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		Date date = null;
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		try {
 			date = format.parse(time);
 		} catch (ParseException e) {
@@ -140,7 +162,6 @@ public class ViqCommonUtilities extends ViqSQLiteOpenHelper {
 		String gps = null;
 
 		Location location = null;
-
 		Criteria criteria = new Criteria();
 		criteria.setAccuracy(Criteria.ACCURACY_FINE);
 		criteria.setAltitudeRequired(false);
@@ -153,26 +174,6 @@ public class ViqCommonUtilities extends ViqSQLiteOpenHelper {
 		if (provider != null) {
 			location = locationManager.getLastKnownLocation(provider);
 		}
-
-		// Location location = null;
-		//
-		// LocationManager locationManager = (LocationManager) context
-		// .getSystemService(Context.LOCATION_SERVICE);
-		// LocationProvider gpsProvider = locationManager
-		// .getProvider(LocationManager.GPS_PROVIDER);
-		// if (gpsProvider != null) {
-		// String providerName = gpsProvider.getName();
-		// locationManager.requestSingleUpdate(providerName, null);
-		// try {
-		// locationManager.requestSingleUpdate(
-		// LocationManager.NETWORK_PROVIDER, null);
-		// } catch (RuntimeException e) {
-		// // If anything at all goes wrong with getting a cell location do
-		// // not abort. Cell location is not essential to this app.
-		// }
-		// location = locationManager.getLastKnownLocation(providerName);
-		// }
-
 		if (location != null) {
 			double longtitude = location.getLongitude();
 			double latitude = location.getLatitude();
@@ -183,29 +184,6 @@ public class ViqCommonUtilities extends ViqSQLiteOpenHelper {
 			gps = "Lon:0; Lat:0";
 		}
 		return gps;
-	}
-
-	/**
-	 * Get the corresponding file of the dcimDirectory /sdcard/DCIM/name. Will
-	 * create the dcimDirectory if is doesn't exist.
-	 * 
-	 * @param dirName
-	 *            the dcimDirectory dirName.
-	 * @return the dcimDirectory's corresponding file.
-	 */
-	public static File getDcimDirectory(String dirName) {
-		if (dirName == null) {
-			return null;
-		}
-
-		File dcimDirectory = null;
-		String dcimPath = Environment.getExternalStoragePublicDirectory(
-				Environment.DIRECTORY_DCIM).getPath();
-		dcimDirectory = new File(dcimPath, dirName);
-		if (!dcimDirectory.exists()) {
-			dcimDirectory.mkdirs();
-		}
-		return dcimDirectory;
 	}
 
 	public static Bitmap getBitmap(String imagePath, int inSampleSize) {

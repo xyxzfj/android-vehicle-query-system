@@ -76,7 +76,7 @@ public class VehicleQueryListActivity extends ViqBaseShakeableListActivity {
 		String time = cursor.getString(VIEW_QUERY_INFO_COLUMN_TIME);
 		String relativeTime = getRelativeTime(this, time);
 
-		menu.setHeaderTitle(id + " " + licence + ", " + relativeTime);
+		menu.setHeaderTitle(id + ". " + licence + ", " + relativeTime);
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.vehicle_query_list_context_menu, menu);
 	}
@@ -197,7 +197,7 @@ public class VehicleQueryListActivity extends ViqBaseShakeableListActivity {
 					null, null, null, null, "_id DESC");
 		} else {
 			String[] selectionArgs = getSelectiionArgs(getFilter(),
-					VIEW_QUERY_INFO_COLUMNS);
+					VIEW_QUERY_INFO_COLUMNS.length);
 			cursor = database.query(VIEW_QUERY_INFO, VIEW_QUERY_INFO_COLUMNS,
 					VIEW_QUERY_INFO_SELECTION, selectionArgs, null, null,
 					"_id DESC");

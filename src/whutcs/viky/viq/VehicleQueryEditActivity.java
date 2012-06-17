@@ -10,7 +10,6 @@ import static whutcs.viky.viq.ViqCommonUtilities.getDataTimeString;
 import static whutcs.viky.viq.ViqCommonUtilities.getGpsString;
 import static whutcs.viky.viq.ViqCommonUtilities.getNewImageFile;
 import static whutcs.viky.viq.ViqCommonUtilities.uriToImagePath;
-import static whutcs.viky.viq.ViqSQLiteOpenHelper.SPECIAL_COLUMN_LICENCE;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY_COLUMNS;
 import static whutcs.viky.viq.ViqSQLiteOpenHelper.TABLE_QUERY_COLUMN_LICENCE;
@@ -207,8 +206,8 @@ public class VehicleQueryEditActivity extends Activity {
 			ContentValues values = new ContentValues();
 			values.put(TABLE_QUERY_COLUMNS[TABLE_QUERY_COLUMN_PHOTO], mVehicle);
 			if (mLicenceText.getText() != null) {
-				values.put(SPECIAL_COLUMN_LICENCE, mLicenceText.getText()
-						.toString());
+				values.put(TABLE_QUERY_COLUMNS[TABLE_QUERY_COLUMN_LICENCE],
+						mLicenceText.getText().toString());
 			}
 			if (mTimeText.getText() != null) {
 				values.put(TABLE_QUERY_COLUMNS[TABLE_QUERY_COLUMN_TIME],

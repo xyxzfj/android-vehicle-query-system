@@ -31,13 +31,14 @@
                     android:text="@string/touch_to_new"
                     android:textAppearance="?android:attr/textAppearanceSmall"/>
             </LinearLayout>
-
+
             <ImageView
                 android:id="@+id/vehicle"
                 android:layout_width="match_parent"
                 android:layout_height="100dp"
                 android:layout_gravity="center_horizontal"
-                android:contentDescription="@string/vehicle_image" android:src="@drawable/blank"/>
+                android:contentDescription="@string/vehicle_image"
+                android:src="@drawable/blank" />
 
             <requestFocus />
         </TableRow>

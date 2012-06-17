@@ -96,7 +96,7 @@
     <string name="time">时间</string>
     <string name="edit_vehicle_info">编辑车辆信息</string>
     <string name="edit_vehicle_query">编辑车辆登记</string>
-    <string name="palm_vehicle_query_system">掌上车辆查询系统</string>
+    <string name="palm_vehicle_query_system">照片识车</string>
     <string name="check_vehicle">查询/登记车辆</string>
     <string name="input_licence_here">在此直接输入车牌号</string>
     <string name="check_ok">登记成功，已转至查看车辆</string>

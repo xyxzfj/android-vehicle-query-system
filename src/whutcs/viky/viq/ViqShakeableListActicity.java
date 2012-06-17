@@ -55,17 +55,14 @@ public abstract class ViqShakeableListActicity extends ListActivity implements
 		LocationProvider gpsProvider = locationManager
 				.getProvider(LocationManager.GPS_PROVIDER);
 		if (gpsProvider != null) {
-			String providerName = gpsProvider.getName();
-			locationManager.requestLocationUpdates(providerName, 1000, 5, this);
 			try {
 				locationManager.requestLocationUpdates(
+						LocationManager.GPS_PROVIDER, 1000, 5, this);
+				locationManager.requestLocationUpdates(
 						LocationManager.NETWORK_PROVIDER, 1000, 5, this);
-			} catch (RuntimeException e) {
-				// If anything at all goes wrong with getting a cell location do
-				// not abort. Cell location is not essential to this app.
+			} catch (Exception e) {
 			}
 		}
-
 	}
 
 	@Override

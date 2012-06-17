@@ -239,15 +239,6 @@ public abstract class ViqBaseShakeableListActivity extends
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
 		Log.v(TAG, "onListItemClick");
-
-		// // Retrieve the cursor (row) that defines the clicked item.
-		// Cursor cursor = (Cursor) getListAdapter().getItem(position);
-		// // Get the licence field of the clicked item
-		// String licence = cursor.getString(mColumnLicence);
-		//
-		// startActivity(new Intent(this,
-		// VehicleItemViewActivity.class).putExtra(
-		// EXTRA_LICENCE, licence));
 	}
 
 	protected void toggleQuickSearchMode() {
