@@ -114,7 +114,7 @@ public class VehicleLicenceInputActivity extends Activity {
 	private static final String TAG = "VehicleLicenceInputActivity";
 
 	// TODO: set false when publishing
-	private static final boolean SAVE_IMG = false;
+	private static final boolean SAVE_IMG = true;
 
 	public static final String SAVE_IMAGE_PATH = getDcimDirectory("viq_save")
 			.getPath() + File.separator;
@@ -553,6 +553,16 @@ public class VehicleLicenceInputActivity extends Activity {
 						vehicleImage);
 			}
 
+			// !!!! test only:
+			IplImage testCanny = IplImage.create(vehicleImage.width(),
+					vehicleImage.height(), IPL_DEPTH_8U, 1);
+			cvCopy(vehicleImage, testCanny);
+			cvCanny(vehicleImage, testCanny, 128, 255, 3);
+			if (SAVE_IMG) {
+				cvSaveImage(SAVE_IMAGE_PATH + (poi++) + ".cvCanny0().jpg",
+						testCanny);
+			}
+
 			// find plate-like contour from the binary image
 			CvSeq plateLikeContour = new CvSeq(null);
 			int plateLikeContours = cvFindContours(vehicleImage,
@@ -591,18 +601,26 @@ public class VehicleLicenceInputActivity extends Activity {
 								/ ((double) plateRect.height());
 
 						// if the width and height ratio (standard
-						// 440/140==3.14) is
-						// between 2.8 and 3.4 we suppose, this area has licence
-						// plate and we extract that area from grayscale image
+						// 440/140==3.14) is between 2.8 and 3.4 we suppose,
+						// this area has licence plate and we extract that area
+						// from grayscale image
 						if (ratioWH > 2.8 && ratioWH < 3.4) {
 							// set vehicleImageCopy's ROI the plateRect
 							cvSetImageROI(vehicleImageCopy, plateRect);
 
-							// licence plate image rotation:
-
 							IplImage plateLikeImage;
 							plateLikeImage = IplImage.create(plateRect.width(),
 									plateRect.height(), IPL_DEPTH_8U, 1);
+
+							// !!! test only:
+							cvCopy(vehicleImageCopy, plateLikeImage);
+							if (SAVE_IMG) {
+								cvSaveImage(SAVE_IMAGE_PATH + (poi++)
+										+ ".cvCopy().jpg", plateLikeImage);
+							}
+
+							// licence plate image rotation:
+
 							// set plateLikeImage pure black
 							cvZero(plateLikeImage);
 

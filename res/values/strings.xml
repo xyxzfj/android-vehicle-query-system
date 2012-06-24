@@ -34,11 +34,13 @@
     <string name="vehicle_query_list_empty">车辆查询/登记列表为空</string>
     <string name="query_method">车牌号输入方式</string>
     <string name="query_method_summary">选择车牌号输入方式：拍摄车牌照片（相机），选择车牌照片（图库），手工输入</string>
+
     <string-array name="entries_query_method">
         <item>拍摄车牌照片</item>
         <item>选择车牌照片</item>
         <item>手工输入</item>
     </string-array>
+
     <string name="take_licence_image">拍摄车牌照片</string>
     <string name="select_licence_image">选择车牌照片</string>
     <string name="input_licence_number">手工输入</string>
@@ -102,6 +104,6 @@
     <string name="check_ok">登记成功，已转至查看车辆</string>
     <string name="vehicle_info">车辆信息</string>
     <string name="vehicle_query">车辆登记</string>
-    <string name="send_vehicle_query">短信发送该登记信息</string>
-    
+    <string name="send_vehicle_query">短信发送该登记记录</string>
+
 </resources>

@@ -12,7 +12,7 @@ import android.database.sqlite.SQLiteOpenHelper;
  * 
  */
 public class ViqSQLiteOpenHelper extends SQLiteOpenHelper {
-	private static final String TAG = "ViqSQLiteOpenHelper";
+	// private static final String TAG = "ViqSQLiteOpenHelper";
 
 	// Database schema.
 	public static final String DB_VIQ = "viq.db";
