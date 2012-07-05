@@ -39,7 +39,7 @@ public class ViqCommonUtilities extends ViqSQLiteOpenHelper {
 	 */
 	public static final File DIRECTORY_VIQ = getDcimDirectory(APP_NAME);
 
-	public static final String EXTRA_ID = "id";
+	public static final String EXTRA_ID = "_id";
 	public static final String EXTRA_LICENCE = "licenee";
 	public static final String EXTRA_VEHICLE = "vehicle";
 

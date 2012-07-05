@@ -184,7 +184,8 @@ public class VehicleInfoListActivity extends ViqBaseShakeableListActivity {
 			break;
 		}
 
-		Log.v(TAG, clipboard.getText().toString());
+		Log.v(TAG, clipboard.getText() != null ? clipboard.getText().toString()
+				: "no clipboard text!");
 		return result;
 	}
 

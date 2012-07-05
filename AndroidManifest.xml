@@ -42,11 +42,11 @@
         
         <activity
             android:name=".VehicleInfoEditActivity"
-            android:label="@string/vehicle_info" >
+            android:label="@string/edit_vehicle_info" >
         </activity>
         <activity
             android:name=".VehicleQueryEditActivity"
-            android:label="@string/vehicle_query" >
+            android:label="@string/edit_vehicle_query" >
         </activity><activity android:name=".ViqPreferenceActivity" android:label="@string/preference">
         </activity>
     </application>
