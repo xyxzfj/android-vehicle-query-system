@@ -98,9 +98,14 @@ import com.googlecode.javacv.cpp.opencv_core.CvPoint2D32f;
 import com.googlecode.javacv.cpp.opencv_core.CvRect;
 import com.googlecode.javacv.cpp.opencv_core.CvSeq;
 import com.googlecode.javacv.cpp.opencv_core.IplImage;
+import com.googlecode.javacv.cpp.opencv_imgproc;
 import com.googlecode.leptonica.android.Pix;
 import com.googlecode.leptonica.android.ReadFile;
 import com.googlecode.tesseract.android.TessBaseAPI;
+import org.opencv.core.*;
+import org.opencv.highgui.*;
+import org.opencv.imgproc.*;
+import org.opencv.ml.*;
 
 /**
  * Inputs a licence (number) -- either by recognizing from a vehicle image, or
@@ -525,11 +530,6 @@ public class VehicleLicenceInputActivity extends Activity {
 						vehicleImage);
 			}
 
-			// create a copy of the grayscale vehicle image
-			IplImage vehicleImageCopy = IplImage.create(vehicleImage.width(),
-					vehicleImage.height(), IPL_DEPTH_8U, 1);
-			cvCopy(vehicleImage, vehicleImageCopy);
-
 			// smooth the grayscale image
 			cvSmooth(vehicleImage, vehicleImage, CV_GAUSSIAN, 3);
 			if (SAVE_IMG) {
@@ -552,6 +552,11 @@ public class VehicleLicenceInputActivity extends Activity {
 				cvSaveImage(SAVE_IMAGE_PATH + (poi++) + ".cvThreshold().jpg",
 						vehicleImage);
 			}
+
+			// create a copy of the grayscale image
+			IplImage vehicleImageCopy = IplImage.create(vehicleImage.width(),
+					vehicleImage.height(), IPL_DEPTH_8U, 1);
+			cvCopy(vehicleImage, vehicleImageCopy);
 
 			// !!!! test only:
 			IplImage testCanny = IplImage.create(vehicleImage.width(),
@@ -632,9 +637,16 @@ public class VehicleLicenceInputActivity extends Activity {
 									cvCreateMemStorage(0));
 
 							// rotate the plateLikeImage
+							float angle = box.angle();
+							if (angle > 45) {
+								angle -= 90;
+							} else if (angle < -45) {
+								angle += 90;
+							}
 							CvMat transformMat = CvMat.create(2, 3, CV_32FC1);
-							cv2DRotationMatrix(plateImageCen, box.angle(), 1.0,
+							cv2DRotationMatrix(plateImageCen, angle, 1.0,
 									transformMat);
+							Log.v(TAG, "angle: " + angle);
 
 							cvWarpAffine(vehicleImageCopy, plateLikeImage,
 									transformMat, CV_INTER_LINEAR
@@ -700,10 +712,12 @@ public class VehicleLicenceInputActivity extends Activity {
 									// charRectangle
 									// area belongs to licence number and it is
 									// copied to new image as we can see
-									if (2 * charRect.height() > plateLikeImage
-											.height()
-											&& 2 * charRect.width() < plateLikeImage
-													.width()) {
+									int w = charRect.width();
+									int h = charRect.height();
+									if (2 * h > plateLikeImage.height()
+											&& h < plateLikeImage.height()
+											&& 7 * w < plateLikeImage.width()
+											&& 15 * w > plateLikeImage.width()) {
 										cvSetImageROI(plateImageClone, charRect);
 										if (SAVE_IMG) {
 											cvSaveImage(SAVE_IMAGE_PATH
