@@ -109,8 +109,8 @@ import org.opencv.ml.*;
 
 /**
  * Inputs a licence (number) -- either by recognizing from a vehicle image, or
- * by hand typed in, or both (in which the later is a corcharRecting process). A
- * vehicle image can be either from the camera or from the gallary.
+ * by hand typed in, or both (in which the later is a corcharLikeRecting
+ * process). A vehicle image can be either from the camera or from the gallary.
  * 
  * @author xyxzfj@gmail.com
  * 
@@ -165,7 +165,7 @@ public class VehicleLicenceInputActivity extends Activity {
 	private final CandidateButton[][] mCandidateButtons = new CandidateButton[CANDIDATES][PLATECHARS];
 
 	/**
-	 * The edit text row showing the result and accepting dicharRect edit.
+	 * The edit text row showing the result and accepting dicharLikeRect edit.
 	 */
 	private final ResultEditText[] mResultTexts = new ResultEditText[PLATECHARS];
 
@@ -313,7 +313,7 @@ public class VehicleLicenceInputActivity extends Activity {
 			}
 
 			recogniseImage();
-			showResultForCorcharRecting();
+			showResultForCorcharLikeRecting();
 		}
 	}
 
@@ -362,9 +362,10 @@ public class VehicleLicenceInputActivity extends Activity {
 	}
 
 	/**
-	 * Show the recognition result and let the user corcharRect what is wrong.
+	 * Show the recognition result and let the user corcharLikeRect what is
+	 * wrong.
 	 */
-	private void showResultForCorcharRecting() {
+	private void showResultForCorcharLikeRecting() {
 		// Show the extracted licence image.
 		ImageView extractedLicenceImageView = (ImageView) findViewById(R.id.extracted_licence);
 		extractedLicenceImageView
@@ -513,18 +514,20 @@ public class VehicleLicenceInputActivity extends Activity {
 		// progressing order indicator
 		int poi = 1;
 
+		// create folder "viq_save" if none
+		getDcimDirectory("viq_save");
+
 		// the original vehicle image
-		IplImage vehicleOriginalImage = cvLoadImage(vehicleImagePath);
+		IplImage vehicleImage0 = cvLoadImage(vehicleImagePath);
 
-		if (vehicleOriginalImage != null) {
-			// !!!! image process:
+		if (vehicleImage0 != null) {
+			// !!! vehicle image process...
 
-			IplImage vehicleImage = IplImage.create(
-					vehicleOriginalImage.width(),
-					vehicleOriginalImage.height(), IPL_DEPTH_8U, 1);
+			IplImage vehicleImage = IplImage.create(vehicleImage0.width(),
+					vehicleImage0.height(), IPL_DEPTH_8U, 1);
 
 			// convert vehicle image into grayscale
-			cvCvtColor(vehicleOriginalImage, vehicleImage, CV_BGR2GRAY);
+			cvCvtColor(vehicleImage0, vehicleImage, CV_BGR2GRAY);
 			if (SAVE_IMG) {
 				cvSaveImage(SAVE_IMAGE_PATH + (poi++) + ".cvCvtColor.jpg",
 						vehicleImage);
@@ -553,10 +556,10 @@ public class VehicleLicenceInputActivity extends Activity {
 						vehicleImage);
 			}
 
-			// create a copy of the grayscale image
-			IplImage vehicleImageCopy = IplImage.create(vehicleImage.width(),
+			// create a copy of the binary image
+			IplImage vehicleImage1 = IplImage.create(vehicleImage.width(),
 					vehicleImage.height(), IPL_DEPTH_8U, 1);
-			cvCopy(vehicleImage, vehicleImageCopy);
+			cvCopy(vehicleImage, vehicleImage1);
 
 			// !!!! test only:
 			IplImage testCanny = IplImage.create(vehicleImage.width(),
@@ -568,8 +571,8 @@ public class VehicleLicenceInputActivity extends Activity {
 						testCanny);
 			}
 
-			// find plate-like contour from the binary image
-			CvSeq plateLikeContour = new CvSeq(null);
+			// find plate-like contours from the binary image
+			CvSeq plateLikeContour = new CvSeq(null);// mustn't be null!
 			int plateLikeContours = cvFindContours(vehicleImage,
 					cvCreateMemStorage(0), plateLikeContour,
 					Loader.sizeof(CvContour.class), CV_RETR_LIST,
@@ -581,7 +584,7 @@ public class VehicleLicenceInputActivity extends Activity {
 			}
 			Log.v(TAG, "plateLikeContours: " + plateLikeContours);
 
-			// !!!! licence plate detection:
+			// !!! licence plate image detect...
 
 			// looping through all the plate-like contours to find the plate
 			// image
@@ -599,32 +602,29 @@ public class VehicleLicenceInputActivity extends Activity {
 					if (polyPlateLikeContour.total() == 4
 							&& cvContourArea(polyPlateLikeContour,
 									CV_WHOLE_SEQ, 0) > 600) {
-						// find the bounding charRectangle of the polygon
-						CvRect plateRect = cvBoundingRect(polyPlateLikeContour,
-								0);
-						double ratioWH = ((double) plateRect.width())
-								/ ((double) plateRect.height());
+						// find the bounding rectangle of the polygon
+						CvRect plateLikeRect = cvBoundingRect(
+								polyPlateLikeContour, 0);
+						double ratioWH = ((double) plateLikeRect.width())
+								/ ((double) plateLikeRect.height());
 
-						// if the width and height ratio (standard
-						// 440/140==3.14) is between 2.8 and 3.4 we suppose,
-						// this area has licence plate and we extract that area
-						// from grayscale image
+						// check width/height ratio (440/140==3.14)
 						if (ratioWH > 2.8 && ratioWH < 3.4) {
-							// set vehicleImageCopy's ROI the plateRect
-							cvSetImageROI(vehicleImageCopy, plateRect);
+							// set vehicleImage1's ROI the plateLikeRect
+							cvSetImageROI(vehicleImage1, plateLikeRect);
 
 							IplImage plateLikeImage;
-							plateLikeImage = IplImage.create(plateRect.width(),
-									plateRect.height(), IPL_DEPTH_8U, 1);
+							plateLikeImage = IplImage.create(
+									plateLikeRect.width(),
+									plateLikeRect.height(), IPL_DEPTH_8U, 1);
 
-							// !!! test only:
-							cvCopy(vehicleImageCopy, plateLikeImage);
 							if (SAVE_IMG) {
+								cvCopy(vehicleImage1, plateLikeImage);
 								cvSaveImage(SAVE_IMAGE_PATH + (poi++)
 										+ ".cvCopy().jpg", plateLikeImage);
 							}
 
-							// licence plate image rotation:
+							// !!! licence plate image rotate...
 
 							// set plateLikeImage pure black
 							cvZero(plateLikeImage);
@@ -636,7 +636,7 @@ public class VehicleLicenceInputActivity extends Activity {
 							CvBox2D box = cvMinAreaRect2(polyPlateLikeContour,
 									cvCreateMemStorage(0));
 
-							// rotate the plateLikeImage
+							// rotate the plate like image
 							float angle = box.angle();
 							if (angle > 45) {
 								angle -= 90;
@@ -648,7 +648,7 @@ public class VehicleLicenceInputActivity extends Activity {
 									transformMat);
 							Log.v(TAG, "angle: " + angle);
 
-							cvWarpAffine(vehicleImageCopy, plateLikeImage,
+							cvWarpAffine(vehicleImage1, plateLikeImage,
 									transformMat, CV_INTER_LINEAR
 											+ CV_WARP_FILL_OUTLIERS,
 									cvScalarAll(0));
@@ -657,33 +657,36 @@ public class VehicleLicenceInputActivity extends Activity {
 										+ ".cvWarpAffine().jpg", plateLikeImage);
 							}
 
-							// create a clone of plate image
-							IplImage plateImageClone = plateLikeImage.clone();
-
-							// character segmentation:
-
-							IplImage plateImageCanny = IplImage.create(
-									plateLikeImage.width(),
-									plateLikeImage.height(), IPL_DEPTH_8U, 1);
-							cvCanny(plateLikeImage, plateImageCanny, 128, 255,
-									3);
-							if (SAVE_IMG) {
-								cvSaveImage(SAVE_IMAGE_PATH + (poi++)
-										+ ".cvCanny().jpg", plateImageCanny);
-							}
-
-							// create a all white clone of plate image
+							// create a clone of plate like image
 							IplImage plateLikeImageClone = plateLikeImage
 									.clone();
-							cvSet(plateLikeImageClone, CV_RGB(255.0, 255, 255));
+
+							// !!! character segment...
+
+							IplImage plateLikeImageCanny = IplImage.create(
+									plateLikeImage.width(),
+									plateLikeImage.height(), IPL_DEPTH_8U, 1);
+							cvCanny(plateLikeImage, plateLikeImageCanny, 128,
+									255, 3);
 							if (SAVE_IMG) {
 								cvSaveImage(SAVE_IMAGE_PATH + (poi++)
-										+ ".cvSet().jpg", plateLikeImageClone);
+										+ ".cvCanny().jpg", plateLikeImageCanny);
+							}
+
+							// create a all white clone of plate like image
+							IplImage plateLikeImageWhiteClone = plateLikeImage
+									.clone();
+							cvSet(plateLikeImageWhiteClone,
+									CV_RGB(255.0, 255, 255));
+							if (SAVE_IMG) {
+								cvSaveImage(SAVE_IMAGE_PATH + (poi++)
+										+ ".cvSet().jpg",
+										plateLikeImageWhiteClone);
 							}
 
 							CvSeq charLikeContour = new CvSeq(null);
 							int charLikeContours = cvFindContours(
-									plateImageCanny, cvCreateMemStorage(0),
+									plateLikeImageCanny, cvCreateMemStorage(0),
 									charLikeContour,
 									Loader.sizeof(CvContour.class),
 									CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE,
@@ -703,34 +706,29 @@ public class VehicleLicenceInputActivity extends Activity {
 											cvCreateMemStorage(0),
 											CV_POLY_APPROX_DP, 1, 0);
 
-									CvRect charRect = cvBoundingRect(
+									CvRect charLikeRect = cvBoundingRect(
 											polyCharLikeContour, 0);
-									// if the bounding charRectangle height is
-									// greater
-									// than the half times height of the licence
-									// plate, then it is supposed that
-									// charRectangle
-									// area belongs to licence number and it is
-									// copied to new image as we can see
-									int w = charRect.width();
-									int h = charRect.height();
+									// check width and height weight
+									int w = charLikeRect.width();
+									int h = charLikeRect.height();
 									if (2 * h > plateLikeImage.height()
 											&& h < plateLikeImage.height()
 											&& 7 * w < plateLikeImage.width()
 											&& 15 * w > plateLikeImage.width()) {
-										cvSetImageROI(plateImageClone, charRect);
+										cvSetImageROI(plateLikeImageClone,
+												charLikeRect);
 										if (SAVE_IMG) {
 											cvSaveImage(SAVE_IMAGE_PATH
 													+ (poi++)
 													+ ".cvSetImageROI().jpg",
-													plateImageClone);
+													plateLikeImageClone);
 										}
-										cvSetImageROI(plateLikeImageClone,
-												charRect);
-										cvCopy(plateImageClone,
-												plateLikeImageClone);
-										cvResetImageROI(plateImageClone);
+										cvSetImageROI(plateLikeImageWhiteClone,
+												charLikeRect);
+										cvCopy(plateLikeImageClone,
+												plateLikeImageWhiteClone);
 										cvResetImageROI(plateLikeImageClone);
+										cvResetImageROI(plateLikeImageWhiteClone);
 										chars++;
 									}
 								}
@@ -740,9 +738,11 @@ public class VehicleLicenceInputActivity extends Activity {
 
 							// if all chars are found, stop searching!
 							if (chars == 7) {
-								plateImage = plateLikeImageClone;
+								plateImage = plateLikeImageWhiteClone;
 								break;
 							}
+
+							cvResetImageROI(vehicleImage1);
 
 						}// if (ratioWH > 2.8 && ratioWH < 3.4)
 
@@ -759,9 +759,6 @@ public class VehicleLicenceInputActivity extends Activity {
 					cvSaveImage(SAVE_IMAGE_PATH + (poi++)
 							+ ".cvThreshold().jpg", plateImage);
 				}
-
-				cvResetImageROI(vehicleImageCopy);
-
 			}
 
 		} // if (vehicleImage != null)
